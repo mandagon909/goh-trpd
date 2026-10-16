@@ -1,0 +1,1246 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Царь Горы — ТРП по «Богу старшей школы» | Discord</title>
+<meta name="description" content="Царь Горы — текстовая ролевая игра (ТРП) в Discord по манхве «Бог старшей школы» (The God of High School). Создай бойца, заполни анкеты персонажа и чарёка, прокачивай параметры и сражайся на турнире.">
+<meta name="keywords" content="Царь Горы, ТРП, текстовая ролевая игра, Бог старшей школы, The God of High School, GoH, чарёк, Discord, ролевая">
+<meta name="theme-color" content="#0B0B0C">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Царь Горы">
+<meta property="og:title" content="Царь Горы — ТРП по «Богу старшей школы»">
+<meta property="og:description" content="Текстовая ролевая игра в Discord: создай бойца, заключи контракт с чарёком и пробейся через турнир.">
+<meta property="og:url" content="https://ТВОЙ-НИК.github.io/goh-trp/">
+<meta property="og:image" content="https://ТВОЙ-НИК.github.io/goh-trp/og.jpg">
+<link rel="canonical" href="https://ТВОЙ-НИК.github.io/goh-trp/">
+<meta name="twitter:card" content="summary_large_image">
+<style>:root{color-scheme:light}body{margin:0;font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="app/config.js"></script>
+<script src="app/supabase-shim.js"></script>
+<script src="app/auth.js"></script>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Rubik+Mono+One&family=Rubik:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: страницы как развороты манхвы — чернильные рамки панелей, жёсткие тени, растровые точки, линии скорости; арты из пула ГМа и галерей бойцов заполняют панели */
+:root{
+  --bg:#E9E9E6; --paper:#FFFFFF; --ink:#0B0B0C; --muted:#5D5D66; --frame:#0B0B0C; --soft:#D5D5D9; --chip:#EEEEF0;
+  --red:#E2001A; --hot:#FFD400; --ok:#127A3E; --warn:#9A6400; --dot:rgba(11,11,12,.13);
+  --display:"Russo One","Arial Black",Impact,sans-serif;
+  --sfx:"Rubik Mono One","Russo One","Arial Black",sans-serif;
+  --body:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0D0D10; --paper:#17171B; --ink:#F3F3F5; --muted:#A0A0AA; --frame:#3C3C45; --soft:#2C2C34; --chip:#222228;
+  --red:#FF2E45; --hot:#FFD400; --ok:#45C27A; --warn:#E3A93B; --dot:rgba(255,255,255,.06); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0D0D10; --paper:#17171B; --ink:#F3F3F5; --muted:#A0A0AA; --frame:#3C3C45; --soft:#2C2C34; --chip:#222228;
+  --red:#FF2E45; --hot:#FFD400; --ok:#45C27A; --warn:#E3A93B; --dot:rgba(255,255,255,.06); color-scheme:dark}
+
+*,*::before,*::after{box-sizing:border-box}
+body{background-color:var(--bg);background-image:radial-gradient(var(--dot) 1.2px,transparent 1.4px);background-size:9px 9px;color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:#0B0B0C}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{background:#0B0B0C;color:#fff;position:sticky;top:env(safe-area-inset-top,0px);z-index:20;border-bottom:4px solid #E2001A}
+header.top .wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:10px}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer;background:none;border:0;color:inherit;padding:0}
+.logo .mark{font:24px var(--sfx);background:#E2001A;color:#fff;padding:2px 9px 4px;transform:skewX(-12deg);line-height:1}
+.logo .t{font:18px var(--display);letter-spacing:.03em;text-align:left;line-height:1.1}
+.logo small{display:block;font:500 10.5px var(--mono);opacity:.6;letter-spacing:.1em;text-transform:uppercase}
+nav.tabs{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap}
+nav.tabs button{font:15px var(--display);color:#fff;background:transparent;border:0;padding:8px 12px;cursor:pointer;opacity:.7;transform:skewX(-10deg)}
+nav.tabs button:hover{opacity:1;background:#ffffff14}
+nav.tabs button[aria-current="true"]{opacity:1;background:#E2001A}
+main{padding-block:22px 72px}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--hot);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;line-height:1.1;margin:0}
+h1{font-size:clamp(28px,5vw,46px);letter-spacing:.01em}
+h2{font-size:20px}
+.eyebrow{font:700 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.muted{color:var(--muted)}
+.pnl{background:var(--paper);border:3px solid var(--frame);box-shadow:6px 6px 0 var(--frame)}
+.notice{background:var(--paper);border:3px solid var(--frame);padding:12px 14px;font-size:14px}
+.notice.warn{border-color:var(--warn)}.notice.bad{border-color:var(--red)}
+.btn{display:inline-flex;align-items:center;gap:6px;font:15px var(--display);padding:8px 16px;cursor:pointer;border:3px solid var(--frame);background:var(--paper);box-shadow:3px 3px 0 var(--frame);transition:transform .08s,box-shadow .08s}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--frame)}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--frame)}
+.btn.primary{background:var(--red);color:#fff}
+.btn.danger{color:var(--red)}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.pagehead{display:grid;gap:6px;margin-bottom:22px}
+.sfx{font-family:var(--sfx);letter-spacing:-.02em}
+
+/* hero collage */
+.hero{position:relative;background:#0B0B0C;border:4px solid #0B0B0C;box-shadow:8px 8px 0 #E2001A;margin-bottom:30px;overflow:hidden}
+.collage{display:grid;grid-template-columns:1.35fr 1fr 1fr;grid-template-rows:170px 170px;gap:6px;background:#0B0B0C}
+.collage .c{position:relative;overflow:hidden;background:#1A1A1F}
+.collage .c img,.collage .c video,.collage .c svg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none}
+.collage .c1{grid-row:1/3;clip-path:polygon(0 0,100% 0,88% 100%,0 100%)}
+.collage .c2{margin-left:-14%;clip-path:polygon(12% 0,100% 0,100% 100%,4% 100%)}
+.collage .c3{clip-path:polygon(0 0,100% 0,100% 100%,0 92%)}
+.collage .c4{margin-left:-20%;clip-path:polygon(17% 0,100% 0,100% 100%,9% 100%)}
+.collage .c5{clip-path:polygon(0 8%,100% 0,100% 100%,0 100%)}
+.hero .cap{position:absolute;left:0;bottom:0;z-index:2;padding:18px 22px 20px;display:grid;gap:8px;max-width:min(620px,92%)}
+.hero .cap .tag{justify-self:start;background:#E2001A;color:#fff;font:700 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;padding:4px 9px}
+.hero .cap h1{color:#fff;font-size:clamp(30px,6vw,60px);text-shadow:4px 4px 0 #0B0B0C,-2px -2px 0 #0B0B0C,2px -2px 0 #0B0B0C,-2px 2px 0 #0B0B0C}
+.hero .cap p{margin:0;color:#fff;background:#0B0B0Cdd;padding:8px 12px;max-width:56ch;font-size:14.5px}
+.hero .bang{position:absolute;right:18px;top:14px;z-index:2;font:clamp(30px,6vw,62px) var(--sfx);color:var(--hot);-webkit-text-stroke:3px #0B0B0C;paint-order:stroke fill;transform:rotate(-8deg);pointer-events:none}
+@media (max-width:700px){.collage{grid-template-columns:1fr 1fr;grid-template-rows:150px 110px}.collage .c1{grid-row:1/2;grid-column:1/3;clip-path:polygon(0 0,100% 0,100% 88%,0 100%)}.collage .c2{margin-left:0;clip-path:none}.collage .c3{clip-path:none}.collage .c4,.collage .c5{display:none}.hero .cap{position:relative;max-width:none}}
+
+/* list */
+.listhead{display:flex;flex-wrap:wrap;gap:12px;align-items:end;justify-content:space-between;margin-bottom:18px}
+.tools{display:flex;gap:10px;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label,.lbl{font:700 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.input{border:2px solid var(--frame);background:var(--paper);padding:8px 10px;min-width:0;width:100%;border-radius:0}
+textarea.input{min-height:90px;resize:vertical;line-height:1.5}
+.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:22px}
+.fcard{position:relative;display:grid;grid-template-rows:auto auto;background:var(--paper);border:3px solid var(--frame);box-shadow:6px 6px 0 var(--frame);cursor:pointer;text-align:left;padding:0;width:100%;transition:transform .1s,box-shadow .1s}
+.fcard:hover{transform:translate(-3px,-3px) rotate(-.6deg);box-shadow:9px 9px 0 var(--red)}
+.fcard .cover{position:relative;aspect-ratio:3/4;max-width:100%;overflow:hidden;background:#141418;border-bottom:3px solid var(--frame)}
+.fcard .cover img,.fcard .cover video,.fcard .cover svg{width:100%;height:100%;object-fit:cover;display:block}
+.fcard .cover .mono{position:absolute;inset:0;display:grid;place-items:center;font:84px var(--sfx);color:#fff;opacity:.9}
+.fcard .rankburst{position:absolute;top:8px;right:8px;background:var(--hot);color:#0B0B0C;font:18px var(--sfx);padding:10px 10px;clip-path:polygon(50% 0,61% 22%,85% 10%,78% 36%,100% 50%,78% 64%,85% 90%,61% 78%,50% 100%,39% 78%,15% 90%,22% 64%,0 50%,22% 36%,15% 10%,39% 22%);min-width:58px;text-align:center}
+.fcard .nmband{padding:10px 12px 12px;display:grid;gap:4px;min-width:0}
+.fcard .nm{font:18px var(--display);overflow-wrap:anywhere;line-height:1.15}
+.fcard .sub{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.fcard .gcount{position:absolute;left:8px;bottom:8px;background:#0B0B0Cd0;color:#fff;font:700 11px var(--mono);padding:3px 7px}
+.pill{display:inline-flex;align-items:center;gap:5px;font:700 10.5px var(--mono);letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border:2px solid currentColor;justify-self:start}
+.pill.ok{color:var(--ok)}.pill.pend{color:var(--warn)}.pill.bad{color:var(--red)}
+.empty{background:var(--paper);border:3px dashed var(--frame);padding:34px 20px;text-align:center;display:grid;gap:12px;justify-items:center}
+.rk{font-family:var(--display)}
+
+/* article */
+.spread{position:relative;border:4px solid var(--frame);box-shadow:8px 8px 0 var(--frame);background:#0B0B0C;margin-bottom:26px;overflow:hidden;min-height:220px;display:grid}
+.spread .bgart{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.75;max-width:none}
+.spread .shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(11,11,12,.95) 0%,rgba(11,11,12,.35) 55%,rgba(11,11,12,.15) 100%)}
+.spread .in{position:relative;z-index:1;align-self:end;display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:end;padding:20px}
+.spread .portrait{width:140px;aspect-ratio:3/4;border:4px solid #fff;background:#1A1A1F;overflow:hidden;box-shadow:6px 6px 0 #E2001A;display:grid;place-items:center;font:60px var(--sfx);color:#fff;transform:rotate(-2deg)}
+.spread .portrait img{width:100%;height:100%;object-fit:cover}
+.spread h1{color:#fff;text-shadow:3px 3px 0 #0B0B0C}
+.spread .meta{color:#fff;opacity:.85;font-size:14px}
+.spread .crumbs{color:#fff}
+@media (max-width:560px){.spread .in{grid-template-columns:1fr}.spread .portrait{width:110px}}
+.article{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:30px;align-items:start}
+@media (max-width:900px){.article{grid-template-columns:1fr}}
+.article .body{display:grid;gap:26px;min-width:0}
+.linkbtn{background:none;border:0;padding:0;color:inherit;cursor:pointer;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.sec{display:grid;gap:10px}
+.sec>h2{display:flex;align-items:center;gap:10px}
+.sec>h2::before{content:"";width:14px;height:14px;background:var(--red);transform:rotate(45deg);flex:none}
+.sec p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;max-width:70ch}
+.bubble{background:var(--paper);border:3px solid var(--frame);border-radius:22px;padding:14px 18px;position:relative}
+.bubble::after{content:"";position:absolute;left:34px;bottom:-15px;width:22px;height:22px;background:var(--paper);border-right:3px solid var(--frame);border-bottom:3px solid var(--frame);transform:skewX(30deg) rotate(45deg)}
+.tech{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.tech li{padding:9px 14px;background:var(--paper);border:3px solid var(--frame);overflow-wrap:anywhere;font-weight:500}
+.tech li::before{content:"▶ ";color:var(--red)}
+.traits{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.trait{background:var(--hot);color:#0B0B0C;border:3px solid #0B0B0C;padding:12px 14px;display:grid;gap:4px;min-width:0;box-shadow:4px 4px 0 #0B0B0C}
+.trait b{font:16px var(--display);overflow-wrap:anywhere}
+.trait span{font-size:13.5px;white-space:pre-wrap;overflow-wrap:anywhere}
+.infobox{background:var(--paper);border:3px solid var(--frame);box-shadow:6px 6px 0 var(--frame);position:sticky;top:calc(env(safe-area-inset-top,0px) + 74px)}
+@media (max-width:900px){.infobox{position:static}}
+.ib-head{background:#0B0B0C;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ib-head .n{font:18px var(--display);overflow-wrap:anywhere}
+.ib-head .r{font:22px var(--sfx);color:var(--hot)}
+dl.facts{margin:0;display:grid;grid-template-columns:auto 1fr;font-size:13.5px}
+dl.facts dt,dl.facts dd{margin:0;padding:7px 16px;border-top:2px solid var(--soft)}
+dl.facts dt{color:var(--muted);font-weight:500;padding-right:6px}
+dl.facts dd{overflow-wrap:anywhere;padding-left:6px;font-variant-numeric:tabular-nums;font-weight:500}
+.ib-sec{padding:14px 16px;border-top:3px solid var(--frame);display:grid;gap:9px}
+.ib-sec h3{font:700 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.statrow{display:grid;grid-template-columns:116px 1fr 50px;gap:8px;align-items:center;font-size:13px}
+.statrow .tier{font:500 10.5px var(--mono);color:var(--muted)}
+.bar{height:10px;background:var(--chip);border:2px solid var(--frame);overflow:hidden}
+.bar i{display:block;height:100%;background:repeating-linear-gradient(-45deg,var(--red) 0 6px,#B00015 6px 9px)}
+.statrow .v{font:15px var(--display);text-align:right}
+.record{display:flex;gap:14px;font:700 13px var(--mono)}
+.record .w{color:var(--ok)}.record .l{color:var(--red)}
+.gmnote{font-size:13px;border-left:4px solid var(--hot);padding-left:10px;white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* art slots */
+.slotbox{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.artedit .tart,.artedit .ac,.artedit .regart,.artedit .collage .c,.artedit .duel .side{outline:3px dashed #FFD400;outline-offset:-6px}
+.artedit .hero .cap,.artedit .splash-cap,.artedit .bang,.artedit .splash::after,.artedit .hero::after{opacity:.12;pointer-events:none}
+#artbtn{position:fixed;z-index:60;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));font:15px var(--display);padding:10px 16px;border:3px solid #0B0B0C;background:#FFD400;color:#0B0B0C;box-shadow:4px 4px 0 #0B0B0C;cursor:pointer}
+#artbtn.on{background:#E2001A;color:#fff}
+#slottoast{position:fixed;z-index:61;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#0B0B0C;color:#fff;padding:8px 14px;font-weight:700;border:2px solid #FFD400}
+#slottoast.err{border-color:#E2001A}
+/* start + review */
+.splash{position:relative;border:4px solid #0B0B0C;box-shadow:10px 10px 0 #E2001A;background:#0B0B0C;overflow:hidden;margin-bottom:34px}
+.collage.big{grid-template-rows:230px 230px}
+.splash::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,11,12,.92) 0%,rgba(11,11,12,.6) 45%,rgba(11,11,12,0) 80%);pointer-events:none}
+.splash .bang{position:absolute;right:20px;top:16px;z-index:2;font:clamp(34px,7vw,74px) var(--sfx);color:var(--hot);-webkit-text-stroke:3px #0B0B0C;paint-order:stroke fill;transform:rotate(-9deg);pointer-events:none}
+.splash-cap{position:absolute;z-index:2;left:0;top:0;bottom:0;padding:24px 26px;display:flex;flex-direction:column;justify-content:center;gap:14px;max-width:min(560px,94%)}
+.splash-cap .tag{align-self:flex-start;background:#E2001A;color:#fff;font:700 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;padding:4px 9px}
+.splash-cap h1{color:#fff;font:clamp(40px,8vw,84px)/0.92 var(--sfx);text-shadow:5px 5px 0 #E2001A}
+.splash-cap p{margin:0;color:#fff;opacity:.88;max-width:44ch}
+.btn.huge{font-size:clamp(20px,3vw,28px);padding:14px 28px;align-self:flex-start;box-shadow:6px 6px 0 #fff;border-color:#fff}
+.btn.huge:hover{box-shadow:8px 8px 0 #FFD400}
+.btn.dsbig{background:#5865F2;color:#fff;text-decoration:none;align-self:auto}
+@media (max-width:700px){.collage.big{grid-template-rows:200px 120px}.splash::after{background:linear-gradient(0deg,rgba(11,11,12,.95) 30%,rgba(11,11,12,.2) 100%)}.splash-cap{position:relative;max-width:none}}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:20px}
+.stepcard{background:var(--paper);border:3px solid var(--frame);box-shadow:6px 6px 0 var(--frame);padding:16px;display:grid;gap:6px;transform:rotate(var(--r))}
+.stepcard .num{font:38px var(--sfx);color:var(--red);line-height:1}
+.stepcard p{margin:0;font-size:14px;color:var(--muted)}
+.regwrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:28px;align-items:start;max-width:980px;margin:0 auto}
+@media (max-width:760px){.regwrap{grid-template-columns:1fr}.regart{display:none}}
+.regart{position:relative;aspect-ratio:3/4;max-width:100%;border:4px solid var(--frame);box-shadow:8px 8px 0 var(--red);overflow:hidden;background:#141418;transform:rotate(-1.5deg)}
+.regart img,.regart video,.regart svg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none}
+.qlist{display:grid;gap:12px}
+.qrow{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--paper);border:3px solid var(--frame);box-shadow:4px 4px 0 var(--frame);padding:10px 12px}
+@media (max-width:520px){.qrow{grid-template-columns:64px minmax(0,1fr)}.qrow .btn{grid-column:1/-1}}
+.decide{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.dc{border:2px solid var(--frame);padding:12px;display:grid;gap:8px;align-content:start}
+.dbtns{display:flex;gap:6px;flex-wrap:wrap}
+.chatlist{display:grid;gap:10px;max-height:460px;overflow-y:auto;padding:4px 6px 4px 2px;align-content:start}
+.msg{border:2px solid var(--frame);background:var(--bg);padding:8px 12px;border-radius:16px 16px 16px 2px;max-width:85%;justify-self:start;display:grid;gap:3px;min-width:0}
+.msg.mine{justify-self:end;border-radius:16px 16px 2px 16px;background:var(--paper);box-shadow:3px 3px 0 var(--red)}
+.msg.sys{justify-self:center;max-width:95%;border-radius:0;background:var(--hot);color:#0B0B0C;border-color:#0B0B0C;text-align:center}
+.msg.sys .muted{color:#0B0B0C;opacity:.7}
+.msg .mh{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font-size:12px}
+.msg .mh b{font:14px var(--display)}
+.msg .rl{font:700 10px var(--mono);text-transform:uppercase;letter-spacing:.06em;padding:1px 6px;border:1.5px solid currentColor}
+.msg.r-gm .rl{color:var(--red)}.msg.r-reviewer .rl{color:var(--ok)}
+.msg .mt{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14.5px}
+.chatform{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end}
+@media (max-width:520px){.chatform{grid-template-columns:1fr}}
+.cnt{font:700 11px var(--mono);color:var(--muted)}.cnt.low{color:var(--red)}.cnt.okc{color:var(--ok)}
+nav.tabs .badge{display:inline-block;background:#FFD400;color:#0B0B0C;font:700 11px var(--mono);padding:0 5px;margin-left:5px;transform:skewX(10deg)}
+.tbonus{font:700 11px var(--mono);text-transform:uppercase;letter-spacing:.04em;background:#0B0B0C;color:#FFD400;padding:2px 6px;justify-self:start}
+.dslink{order:3;font:14px var(--display);color:#fff;background:#5865F2;border:2px solid #fff;padding:6px 12px;text-decoration:none;transform:skewX(-10deg);white-space:nowrap}
+.dslink:hover{background:#4752C4}
+nav.tabs{order:2}
+.bonusgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:520px){.bonusgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.bonusgrid .field label{font-size:10px}
+.tbonuses{display:flex;flex-wrap:wrap;gap:5px}
+.modebox{border-top:2px dashed #0B0B0C;padding-top:6px;margin-top:4px;display:grid;gap:4px}
+.modebox b{font:14px var(--display)}
+.tbonus.mode{background:#E2001A;color:#fff}
+.modecol{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:-2px}
+.alloc .modecol{margin-top:2px}
+.modeline{font:700 11px var(--mono);color:#fff;background:#E2001A;padding:1px 6px}
+.modeline b{color:#FFD400;font-family:var(--display);font-weight:400}
+.modeedit{display:grid;gap:8px;padding:10px;border:2px dashed var(--red);background:var(--paper)}
+.techedit{display:grid;gap:12px}
+.techrow{display:grid;gap:8px;padding:12px;border:2px solid var(--frame);background:var(--bg)}
+.techcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.techcard{background:var(--paper);border:3px solid var(--frame);box-shadow:4px 4px 0 var(--frame);padding:12px 14px;display:grid;gap:6px;min-width:0}
+.techcard b{font:16px var(--display);overflow-wrap:anywhere}
+.techcard b::before{content:"▶ ";color:var(--red)}
+.techcard p{margin:0;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.cyhint{font-size:13px;color:var(--muted);border-left:4px solid var(--red);padding:4px 10px;white-space:pre-wrap}
+.cytypes{display:grid;gap:14px}
+.cytypes .ct{background:var(--paper);border:3px solid var(--frame);box-shadow:5px 5px 0 var(--frame);padding:14px 16px;display:grid;gap:6px}
+.cytypes .ct b{font:18px var(--display)}
+.cytypes .ct p{margin:0}
+/* questionnaires */
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.duo-c{border:3px solid var(--frame);background:var(--paper);padding:12px 14px;display:grid;gap:6px;min-width:0}
+.duo-c b{font:15px var(--display)}.duo-c p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.duo-c.good{box-shadow:5px 5px 0 var(--ok)}.duo-c.good b{color:var(--ok)}
+.duo-c.bad{box-shadow:5px 5px 0 var(--red)}.duo-c.bad b{color:var(--red)}
+.factgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.factgrid>div{border:2px solid var(--frame);background:var(--paper);padding:9px 12px;display:grid;gap:3px;min-width:0}
+.factgrid b{font-weight:500;white-space:pre-wrap;overflow-wrap:anywhere}
+.bubble.big p{font:clamp(18px,2.6vw,24px) var(--display);line-height:1.3}
+.cyhead{display:grid;grid-template-columns:220px minmax(0,1fr);overflow:hidden}
+@media (max-width:600px){.cyhead{grid-template-columns:1fr}}
+.cyart{position:relative;min-height:220px;background:#141418;border-right:3px solid var(--frame)}
+@media (max-width:600px){.cyart{border-right:0;border-bottom:3px solid var(--frame)}}
+.cyart img,.cyart svg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none}
+.cyinfo{padding:16px;display:grid;gap:12px;align-content:start;min-width:0}
+.ult{background:#0B0B0C;color:#fff;border:3px solid #0B0B0C;box-shadow:6px 6px 0 var(--hot);padding:14px 16px;white-space:pre-wrap;overflow-wrap:anywhere;font-weight:500}
+.quota{display:flex;gap:8px;flex-wrap:wrap}
+.quota span{border:2px solid var(--frame);padding:4px 10px;font:700 13px var(--mono)}
+.quota span b{font-family:var(--display);font-weight:400;margin-right:4px}
+.quota span.full{background:var(--hot);color:#0B0B0C}.quota span.bad{background:var(--red);color:#fff}
+.startgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+/* gallery */
+.gallery-sec{display:grid;gap:14px}
+.ghead{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
+.drop{border:3px dashed var(--frame);background:var(--paper);padding:22px;display:grid;gap:8px;justify-items:center;text-align:center;cursor:pointer}
+.drop.over{background:var(--hot);color:#0B0B0C}
+.drop .big{font:26px var(--sfx)}
+.masonry{columns:3 220px;column-gap:14px}
+.gi{break-inside:avoid;margin:0 0 14px;position:relative;border:3px solid var(--frame);background:#141418;box-shadow:4px 4px 0 var(--frame);cursor:zoom-in}
+.gi img,.gi video{display:block;width:100%;height:auto;max-width:100%}
+.gi .gcap{display:block;background:var(--paper);padding:6px 10px;font-size:13px;border-top:3px solid var(--frame);overflow-wrap:anywhere}
+.gi .kind{position:absolute;left:6px;top:6px;background:#0B0B0Cd0;color:#fff;font:700 10px var(--mono);padding:2px 6px;letter-spacing:.08em}
+.gi .gtools{position:absolute;right:6px;top:6px;display:flex;gap:4px}
+.gi .gtools button{background:#0B0B0Cd0;color:#fff;border:0;font:700 11px var(--mono);padding:4px 7px;cursor:pointer}
+.gi .gtools button:hover{background:#E2001A}
+.progress{font:700 12.5px var(--mono)}
+.lb{position:fixed;inset:0;z-index:100;background:rgba(5,5,7,.94);display:grid;grid-template-rows:auto 1fr auto;padding:calc(env(safe-area-inset-top,0px) + 10px) max(12px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(12px,env(safe-area-inset-left,0px))}
+.lb .bar2{display:flex;justify-content:space-between;align-items:center;color:#fff;gap:12px}
+.lb .bar2 b{font:16px var(--display)}
+.lb .stage{display:grid;place-items:center;min-height:0;position:relative}
+.lb .stage img,.lb .stage video{max-width:100%;max-height:100%;object-fit:contain;border:3px solid #fff}
+.lb .nav{position:absolute;top:50%;transform:translateY(-50%);background:#E2001A;color:#fff;border:3px solid #fff;font:22px var(--display);width:46px;height:46px;cursor:pointer}
+.lb .nav.prev{left:0}.lb .nav.next{right:0}
+.lb .lbcap{color:#fff;text-align:center;font-size:14px;padding-top:8px;overflow-wrap:anywhere}
+.lb .x{background:#fff;color:#0B0B0C;border:0;font:16px var(--display);padding:6px 12px;cursor:pointer}
+
+/* editor */
+.editor{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:28px;align-items:start}
+@media (max-width:940px){.editor{grid-template-columns:1fr}}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.formgrid .full{grid-column:1/-1}
+@media (max-width:520px){.formgrid{grid-template-columns:1fr}}
+.panel{background:var(--paper);border:3px solid var(--frame);box-shadow:6px 6px 0 var(--frame);padding:16px;display:grid;gap:14px;min-width:0}
+.sticky{position:sticky;top:calc(env(safe-area-inset-top,0px) + 74px)}
+@media (max-width:940px){.sticky{position:static}}
+.spbox{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.spbox b{font:34px var(--sfx);font-variant-numeric:tabular-nums}
+.spbox b.over{color:var(--red)}
+.alloc{display:grid;grid-template-columns:minmax(0,1fr) 32px 58px 32px;gap:8px;align-items:center}
+.alloc .nm{font-size:13.5px;font-weight:700;min-width:0}
+.alloc .nm small{display:block;font-weight:400;color:var(--muted);font-size:11px;font-family:var(--mono)}
+.alloc .val{font:17px var(--display);text-align:center}
+.step{width:32px;height:32px;border:2px solid var(--frame);background:var(--bg);cursor:pointer;font:700 17px var(--mono);display:grid;place-items:center}
+.step:hover:not(:disabled){background:var(--hot);color:#0B0B0C}
+.step:disabled{opacity:.3;cursor:not-allowed}
+.savebar{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.toast{font-size:13px;font-weight:700}
+.toast.ok{color:var(--ok)}.toast.err{color:var(--red)}
+.avedit{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.av{width:64px;height:64px;border:3px solid var(--frame);display:grid;place-items:center;font:26px var(--sfx);color:#fff;background:#0B0B0C;overflow:hidden;flex:none}
+.av img{width:100%;height:100%;object-fit:cover}
+.traitedit{display:grid;gap:8px;padding:12px;border:2px solid var(--frame);background:var(--bg)}
+.gpline{display:grid;grid-template-columns:1fr auto;gap:4px 10px;font-size:13px}
+.gpline b{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+
+/* gm */
+.gmlist{display:grid;gap:18px}
+.gmrow{background:var(--paper);border:3px solid var(--frame);box-shadow:5px 5px 0 var(--frame);padding:14px;display:grid;gap:12px}
+.gmrow .top{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.gmrow .top .who{flex:1;min-width:180px}
+.gmgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.awardline{display:grid;grid-template-columns:minmax(0,2fr) 110px minmax(0,1.4fr) auto;gap:8px;align-items:end}
+@media (max-width:700px){.awardline{grid-template-columns:1fr 1fr}}
+.log{font-size:12.5px;display:grid;gap:3px;max-height:150px;overflow:auto;font-family:var(--mono)}
+.log div{display:flex;gap:8px}.log .plus{color:var(--ok);min-width:56px;text-align:right}
+details summary{cursor:pointer;font-weight:700;font-size:13px}
+.costs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.pool{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.pool .pi{position:relative;aspect-ratio:1;max-width:100%;border:3px solid var(--frame);overflow:hidden;background:#141418}
+.pool .pi img,.pool .pi video{width:100%;height:100%;object-fit:cover}
+.pool .pi .n{position:absolute;left:0;top:0;background:#E2001A;color:#fff;font:700 11px var(--mono);padding:2px 6px}
+.pool .pi .pbtns{position:absolute;right:4px;bottom:4px;display:flex;gap:4px}.pool .pi button{background:#0B0B0Cd0;color:#fff;border:0;font:700 12px var(--mono);padding:3px 8px;cursor:pointer}.pool .pi button:hover{background:#E2001A}
+
+/* compare + ladder + rules */
+.cmp{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:end}
+.cmp .vs{font:40px var(--sfx);color:var(--red);-webkit-text-stroke:2px var(--frame);paint-order:stroke fill;padding-bottom:2px}
+@media (max-width:600px){.cmp{grid-template-columns:1fr}.cmp .vs{text-align:center}}
+.duel{display:grid;grid-template-columns:1fr 1fr;gap:0;border:4px solid var(--frame);box-shadow:8px 8px 0 var(--frame);overflow:hidden;margin-bottom:18px;background:#0B0B0C}
+.duel .side{position:relative;aspect-ratio:4/3;max-width:100%;overflow:hidden}
+.duel .side img,.duel .side svg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none}
+.duel .side.a{clip-path:polygon(0 0,100% 0,90% 100%,0 100%)}
+.duel .side.b{margin-left:-11%;clip-path:polygon(10% 0,100% 0,100% 100%,0 100%)}
+.duel .side .n{position:absolute;bottom:10px;left:12px;right:12px;color:#fff;font:clamp(16px,2.6vw,24px) var(--display);text-shadow:2px 2px 0 #0B0B0C,-1px -1px 0 #0B0B0C}
+.duel .side.b .n{text-align:right}
+.tablewrap{overflow-x:auto;border:3px solid var(--frame);background:var(--paper)}
+table.t{border-collapse:collapse;width:100%;font-size:13.5px}
+table.t th{font:700 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#fff;background:#0B0B0C;text-align:left;padding:9px 10px;white-space:nowrap}
+table.t td{padding:8px 10px;border-top:2px solid var(--soft);vertical-align:top}
+table.t td.num{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.verdict{border:3px solid var(--frame);box-shadow:6px 6px 0 var(--frame);padding:16px 18px;display:grid;gap:6px;color:#fff;position:relative;overflow:hidden}
+.verdict::before{content:"";position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 100% 50%,rgba(255,255,255,.08) 0 3deg,transparent 3deg 9deg);pointer-events:none}
+.verdict>*{position:relative}
+.verdict h2{font-size:24px}
+.verdict p{margin:0;opacity:.94;max-width:72ch}
+.ladder{display:grid;gap:18px}
+.tierblk{background:var(--paper);border:3px solid var(--frame);box-shadow:5px 5px 0 var(--frame);overflow:hidden;display:grid;grid-template-columns:200px minmax(0,1fr)}
+@media (max-width:640px){.tierblk{grid-template-columns:1fr}}
+.tierblk .tart{position:relative;min-height:140px;background:#141418;border-right:3px solid var(--frame);overflow:hidden}
+@media (max-width:640px){.tierblk .tart{border-right:0;border-bottom:3px solid var(--frame);min-height:110px}}
+.tierblk .tart img,.tierblk .tart svg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none}
+.tierblk .tart .code{position:absolute;left:10px;bottom:8px;font:30px var(--sfx);color:#fff;-webkit-text-stroke:2px #0B0B0C;paint-order:stroke fill}
+.tierblk .tb{padding:12px 16px;display:grid;gap:8px;min-width:0}
+.tierblk .tb b{font:17px var(--display)}
+.tierblk ol{margin:0;padding:0;list-style:none;display:grid;gap:3px;font-size:13.5px}
+.tierblk li{display:grid;grid-template-columns:50px 1fr;gap:8px}
+.tierblk li span:first-child{font:13px var(--display);color:var(--red)}
+.rules{display:grid;gap:18px;max-width:82ch}
+.rules p{margin:0}
+.rules ul{margin:0;padding-left:20px;display:grid;gap:3px}
+.rulesgrid{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:28px;align-items:start}
+@media (max-width:900px){.rulesgrid{grid-template-columns:1fr}.rulesgrid .artcol{display:none}}
+.artcol{display:grid;gap:16px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 74px)}
+.artcol .ac{border:3px solid var(--frame);box-shadow:5px 5px 0 var(--frame);aspect-ratio:3/4;max-width:100%;overflow:hidden;background:#141418;position:relative}
+.artcol .ac:nth-child(2){transform:rotate(2deg)}
+.artcol .ac img,.artcol .ac svg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none}
+.tabs2{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.tabs2 button{border:3px solid var(--frame);background:var(--paper);padding:6px 14px;font:14px var(--display);cursor:pointer;transform:skewX(-8deg)}
+.tabs2 button[aria-pressed="true"]{background:var(--red);color:#fff}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="top"><div class="wrap">
+  <button class="logo" id="home" type="button"><span class="mark">GoH</span><span class="t">ЦАРЬ ГОРЫ<small>ТРП · «Бог старшей школы»</small></span></button>
+  <button class="dslink" id="logout" type="button" hidden style="background:#0B0B0C;cursor:pointer" onclick="gohLogout()">Выйти</button>
+  <a class="dslink" href="https://discord.gg/4MFwMvgspf" target="_blank" rel="noopener">Discord ↗</a>
+  <nav class="tabs" id="tabs">
+    <button type="button" data-r="list">Бойцы</button>
+    <button type="button" data-r="edit">Мой боец</button>
+    <button type="button" data-r="compare">Разница сил</button>
+    <button type="button" data-r="rules">Система</button>
+    <button type="button" data-r="queue" id="tab-q" hidden>Анкеты</button>
+    <button type="button" data-r="gm" id="tab-gm" hidden>Панель ГМа</button>
+  </nav>
+</div></header>
+<main class="wrap" id="app">
+  <section class="pagehead" style="padding-block:24px">
+    <span class="eyebrow">ТРП · Discord</span>
+    <h1>Царь Горы — текстовая ролевая игра по «Богу старшей школы»</h1>
+    <p>Сайт Discord-сервера «Царь Горы» по манхве The God of High School (Бог старшей школы). Создай бойца, заключи контракт с чарёком, заполни анкету персонажа и анкету чарёка, раскидай стартовые ранги и прокачивай восемь параметров за бои, тренировки и ивенты.</p>
+    <p>На сайте: регистрация игроков, реестр бойцов, шкала силы от F- до XZ+, система SP и GP, трейты и режимы, проверка анкет анкетологами с чатом, галереи артов персонажей.</p>
+    <p><a href="https://discord.gg/4MFwMvgspf">Discord-сервер «Царь Горы»</a></p>
+    <noscript><p><b>Для работы сайта включи JavaScript в браузере.</b></p></noscript>
+  </section>
+</main>
+<div id="lbroot"></div>
+
+<script>
+/* ===== Система сервера ===== */
+const STATS=[
+  {k:"str",n:"Сила",d:"мощь удара, разрушение, оружие"},
+  {k:"spd",n:"Скорость",d:"атаки, передвижение, уклонение"},
+  {k:"dur",n:"Стойкость",d:"прочность тела и разума"},
+  {k:"end",n:"Выносливость",d:"длительность боя, боевой дух"},
+  {k:"tech",n:"Техника БИ",d:"мастерство боевых искусств"},
+  {k:"ctrl",n:"Контроль Чарёка",d:"точность и экономия GP"},
+  {k:"gp",n:"Запас GP",d:"объём божественной энергии"},
+  {k:"per",n:"Восприятие",d:"боевое чутьё, сенсорика"}
+];
+const RANKS=["F","E","D","C","B","A","S","SS","SSS","SR","SSR","UR","LR","MR","X","XX","XXX","EX","DX","CX","BX","AX","SX","UX","LX","MX","XR","Y","YY","YYY","YR","YYR","UY","LY","MY","XY","Z","ZZ","ZZZ","ZR","ZZR","UZ","LZ","MZ","XZ"];
+const SUB=["-","","+"];
+const MAXL=RANKS.length*3-1;
+const TIERS=["Обыватели и хулиганы", "Отборочные Сеула", "Финал Сеула и пробуждение", "Национальный турнир: основная сетка", "Элита Национального турнира", "Подполье и тень турнира", "Судьи турнира", "Епископы NOX и великие мастера", "Шестёрка и вершина человечества", "Небожители", "Высшие боги", "Мудрецы после реворка", "Пробуждение Майтрейи", "Финальная битва", "Сунь Укун"];
+const GPB=[100,100,100,150,150,200,300,400,600,700,900,1300,1500,2000,2500,3000,3500,4000,5000,6000,7000,8000,9000,10000,13000,15000,20000,25000,30000,40000,50000,60000,80000,100000,150000,200000,250000,300000,400000,500000,700000,1000000,1500000,2000000,2500000];
+const CM=[1.5,1.4,1.3,1.2,1.1,1.0,.95,.85,.65,.6,.55,.5,.45,.4,.35,.3,.28,.25,.22,.2,.18,.16,.14,.12,.1,.09,.08,.07,.06,.05,.045,.04,.035,.03,.025,.02,.018,.015,.012,.01,.008,.006,.005,.004,.003];
+const LADDER=["обычные ученики без боевых искусств", "уличная шпана из подворотен", "Кан Мансок (до серьёзных тренировок)", "рядовые бойцы уличных банд", "чемпион школьной секции по боксу или дзюдо", "Ма Мисон (рестлер, базовые приёмы)", "Пён Джэхи (начальный уровень тхэквондо)", "Гви Ги (без шаманизма)", "Пэк Сынчхоль (до гениального анализа)", "Кан Мансок (финал против Ю Миры)", "Пэк Сынчхоль (с битой против Мори)", "Ю Мира (стиль Безумного Меча)", "средний участник региональных отборочных", "Джин Пумгван (лидер команды Чхунчхон)", "Чон Джугок (до запретного плода)", "Пак Ильпхё (базовый стиль)", "Хан Дэви (начало отборочных, Тансудо)", "Джин Мори (первые раунды, Ре-Тхэквондо)", "Хан Дэви (финал Сеула, «Лазурный Дракон»)", "Ю Мира (пробуждение Лю Бу)", "Хан Дэви (первое использование Хаэтэ)", "Джин Мори (бой против Хаэтэ)", "Чон Джугок (после запретного плода)", "лучшие ученики додзё Ре-Тхэквондо", "Пак Ильпхё (форма Девятихвостого Лиса)", "Джегал Тхэк (базовая форма, кража сил)", "Джин Мори (точки На Бончима)", "победители региональных отборов без чарёка", "участники турнира со слабым или нестабильным чарёком", "бойцы с оружием (кэндо, копьё, шест) уровня сборной региона", "команды крупных городов (Пусан, Инчхон, Тэгу)", "бойцы-контракторы с пробуждённым чарёком", "фавориты турнира до четвертьфинала", "шаманы и бойцы с нестандартными способностями", "четвертьфиналисты Национального турнира", "полуфиналисты Национального турнира", "сильнейшие участники турнира без божественных рангов", "Джегал Тхэк (после поглощения Ключа)", "Пак Ильпхё (контроль Лиса без потери рассудка)", "рядовые исполнители и наёмники NOX", "Хан Дэви (стабильный контроль Хаэтэ)", "Ю Мира (стабильный контроль Лю Бу)", "бойцы элитных отрядов NOX", "низшие епископы NOX", "кандидаты в Судьи", "бойцы подпольных арен Сеула", "наёмники NOX среднего звена", "Джегал Тхэк (полная сила украденных способностей)", "Хан Дэви (Хаэтэ в полную силу)", "Ю Мира (Лю Бу в полную силу)", "Пак Ильпхё (сила Лиса в полную силу)", "агенты и телохранители Судей", "Джин Мори (неполное пробуждение Короля Обезьян)", "элитные исполнители NOX", "Судья О (теневые драконы)", "Судья Q (призыв Джокера)", "Судья R (до раскрытия истинной силы)", "Судья Король (У Сынчхоль после тренировок)", "Со Ханрян (лидер бездомных, мастер оружия)", "Ким Дусик (мастер хваран-до)", "сильнейшие Судьи без ограничителей", "Чон Джэсан (алхимия)", "Судья R (после оригинального Ключа)", "низшие епископы NOX в полную силу", "Епископ Сяочхень (полная боевая готовность)", "Епископ Сан Манджин (Божественный Меч)", "лидеры высшего круга NOX", "На Бончим «Божественный доктор» (без ограничений)", "Пак Ильпхё (таймскип, Всемирный турнир)", "Хан Дэви (таймскип, до пробуждения Мудреца)", "Ю Мира (таймскип, до пробуждения Мудреца)", "сильнейшие мастера мира боевых искусств", "члены Шестёрки (базовый уровень)", "Пак Мубон (Рука Бога)", "Джин Тхэджин (основатель Ре-Тхэквондо)", "Пак Муджин (Рука Бога, пик человека)", "Мори Дан (битва с Исполнителями)", "Джин Тхэджин (пик силы)", "Хан Дэви и Ю Мира (первое пробуждение силы Мудреца)", "Джин Мори (Тхэквондо без Чарёк, пик)", "предел человека: сильнейший смертный, не ставший богом", "воины небесной армии", "Старейшины и элита Небожителей", "Бог 7-го чертога Натак Магма", "Принцы Натак", "Первый принц Натак Ардун", "Михаил и Гавриил", "Уриил (пик мощи)", "Вельзевул (Повелитель мух)", "Пак Муджин (силы старого Императора)", "Один (базовая форма)", "Джин Мори (форма Сейтен с посохом Ёи)", "Один (броня Вальгаллы)", "Сатана (первая фаза)", "Нефритовый Император Окхван (в молодости)", "Сатана (вторая фаза, армия клонов)", "Джин Мори (доспех Ёнпё, режим скорости)", "Татхагата (запечатанная форма)", "Джин Мори (множитель x250 000)", "Ю Мира (Владыка Запада)", "Хан Дэви (Мудрец Востока)", "Пак Ильпхё (Девятихвостый Лис на пике)", "Хан Дэви (полное слияние с силой Одина)", "Ю Мира (пик силы Нефритового Императора)", "Ильпхё, Дэви и Мира (комбо Мудрецов)", "Хан Дэви (Истинная Гравитация)", "Ю Мира (Мудрец и Святой Меч)", "Нефритовый Император Окхван (на пике правления)", "Сатана (энергия Солнца)", "Пак Муджин (начало слияния с Майтрейей)", "Джин Мори (битва в космосе)", "Джин Мори (возвращение памяти Сунь Укуна)", "Пак Муджин (Пробуждённый Майтрейя, первые кресты)", "Сатана (поглощение остатков богов)", "Пак Муджин (крылья Татхагаты)", "Древний Татхагата (эпоха истребления пророков)", "Пак Муджин (Майтрейя со всеми сокровищами)", "Джин Мори (Безграничный Множитель Смерти)", "Джин Мори (призыв всех доспехов)", "Пак Муджин (попытка уничтожить Солнечную систему)", "Джин Мори (Владыка Небес, синяя молния)", "Пак Муджин (слияние души с ядром Будды)", "Джин Мори (Истинный Суверен)", "Муджин-Татхагата (вера всего человечества)", "Джин Мори (слияние с духами павших товарищей)", "Пак Муджин (распад тела от перегрузки энергией)", "Джин Мори (Пронзатель Галактик)", "Джин Мори (все копии Ёи из других измерений)", "Джин Мори (очищение Земли от скверны Татхагаты)", "Сунь Укун (прошлое воплощение, бунт против Небес)", "Джин Мори (Нирвана)", "Джин Мори (энергия вселенского древа)", "Сунь Укун (Великий Мудрец, равный Небу)", "Джин Мори (окончательная форма Верховного Бога)", "потолок: Джин Мори после финала манхвы"];
+const DEFAULT_COSTS=[40,80,150,250,400,600,850,1200,1600,2100,2700,3400,4200,5100,6000];
+const BASE_TRAIT_SLOTS=2, DAILY_CAP=500;
+
+const rIdx=L=>Math.floor(L/3);
+const label=L=>RANKS[rIdx(L)]+SUB[L%3];
+const tierIdx=L=>Math.floor(rIdx(L)/3);
+const tierCode=L=>"L-"+(15-tierIdx(L));
+const gpTotal=L=>{let s=0;for(let i=0;i<=rIdx(L);i++)s+=GPB[i];return s+(L===MAXL?5000000:0)};
+const ctrlMult=L=>L===rIdx(L)*3+2&&RANKS[rIdx(L)]==="SS"?.75:L===MAXL?.001:CM[rIdx(L)];
+const fmt=n=>Number(n||0).toLocaleString("ru-RU");
+
+const PRESETS=[
+ {g:"Повседневность (лимит 500 SP в неделю)",items:[["Содержательный диалог с игроком",25,"daily"],["Повседневность / отдых",55,"daily"],["Лор: арка персонажа",65,"daily"]]},
+ {g:"Ивенты",items:[["Мини-ивент (75–150)",75,"event"],["Глобальный ивент: участие",175,"event"],["Глобальный ивент: значительный вклад",300,"event"]]},
+ {g:"Спарринги",items:[["Спарринг: победа",180,"spar","w"],["Спарринг: поражение",90,"spar","l"]]},
+ {g:"Тренировки",items:[["Лёгкая тренировка",65,"train"],["Тяжёлая тренировка",175,"train"],["Хардкорная тренировка",215,"train"]]},
+ {g:"Битвы",items:[["Равный бой: победа",140,"fight","w"],["Равный бой: поражение",70,"fight","l"],
+   ["Неравный: слабый победил",300,"fight","w"],["Неравный: сильный победил",70,"fight","w"],["Неравный: слабый проиграл",100,"fight","l"],["Неравный: сильный проиграл",60,"fight","l"],
+   ["Один против группы: победил слабых",140,"fight","w"],["Один против сильной группы: победа",400,"fight","w"],["Один против группы: поражение",100,"fight","l"],
+   ["Группа победила сильного врага",50,"fight","w"],["Группа победила слабого врага",150,"fight","w"],
+   ["Группа победила Судью / члена Шестёрки",270,"fight","w"],["Группа победила Епископа NOX / Высшего небожителя",350,"fight","w"],["Участие в Рагнарёке",450,"fight"]]},
+ {g:"Другое",items:[["Своё значение",0,"other"]]}
+];
+const ALLP=PRESETS.flatMap(g=>g.items);
+
+
+const GALLERY_MAX=80, POOL_MAX=40;
+
+/* ===== Состояние ===== */
+const S={db:null,user:null,assets:null,uid:null,owner:false,fighters:{},awards:{},config:{},names:{},route:"list",view:null,ready:false,draft:null,canWrite:true,cmpA:"",cmpB:"",sysTab:"stats",busy:false,players:{},reviews:{},chatUnsub:null,email:"",startStep:"splash"};
+const app=document.getElementById("app");
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const initial=n=>(String(n||"?").trim()[0]||"?").toUpperCase();
+const costs=()=>{const c=S.config.costs;return Array.isArray(c)&&c.length===15?c.map(x=>Math.max(0,+x||0)):DEFAULT_COSTS};
+function cumCost(){const c=costs(),a=[0];for(let L=1;L<=MAXL;L++)a[L]=a[L-1]+c[tierIdx(L)];return a}
+const statsOf=f=>{const s=(f&&f.stats)||{},o={};STATS.forEach(x=>{const v=Math.round(+s[x.k]);o[x.k]=Number.isFinite(v)?Math.min(MAXL,Math.max(0,v)):0});return o};
+const spentSP=(st,start)=>{const cc=cumCost();return STATS.reduce((s,x)=>s+Math.max(0,cc[st[x.k]||0]-cc[(start&&start[x.k])||0]),0)};
+const TIER_STEPS=9,TRAIT_MAX=9;
+const traitBon=t=>{const o={};STATS.forEach(x=>o[x.k]=0);if(!t)return o;if(t.bonuses&&typeof t.bonuses==="object"){STATS.forEach(x=>o[x.k]=Math.max(0,Math.min(TRAIT_MAX,Math.round(+t.bonuses[x.k]||0))))}else if(t.stat&&o[t.stat]!==undefined){o[t.stat]=Math.max(0,Math.min(TRAIT_MAX,Math.round(+t.bonus||0)))}return o};
+const traitBonusOf=traits=>{const o={};STATS.forEach(x=>o[x.k]=0);(Array.isArray(traits)?traits:[]).forEach(t=>{const b=traitBon(t);STATS.forEach(x=>o[x.k]+=b[x.k])});return o};
+const MODE_MAX=18;
+const modeOf=t=>{if(!t||!t.mode||!t.mode.on)return null;const o={};STATS.forEach(x=>o[x.k]=Math.max(0,Math.min(MODE_MAX,Math.round(+((t.mode.bonuses||{})[x.k])||0))));return{name:String(t.mode.name||"").trim()||"Режим",bonuses:o}};
+const modesOf=traits=>(Array.isArray(traits)?traits:[]).map(modeOf).filter(Boolean);
+const modeTags=m=>STATS.filter(x=>m.bonuses[x.k]).map(x=>`<span class="tbonus mode">${esc(x.n)} +${m.bonuses[x.k]}</span>`).join("");
+const modeLines=(modes,k,eff)=>modes.filter(m=>m.bonuses[k]).map(m=>`<span class="modeline">${esc(m.name)} +${m.bonuses[k]} → <b>${label(Math.min(MAXL,eff+m.bonuses[k]))}</b></span>`).join("");
+const bonusTags=t=>{const b=traitBon(t);return STATS.filter(x=>b[x.k]).map(x=>`<span class="tbonus">${esc(x.n)} +${b[x.k]}</span>`).join("")};
+const effFrom=(base,traits)=>{const b=traitBonusOf(traits),o={};STATS.forEach(x=>o[x.k]=Math.min(MAXL,base[x.k]+b[x.k]));return o};
+const effOf=f=>effFrom(statsOf(f),f&&f.traits);
+const skewLimit=eff=>Math.floor(STATS.reduce((s,x)=>s+eff[x.k],0)/STATS.length)+TIER_STEPS;
+const skewIssues=eff=>{const lim=skewLimit(eff);return STATS.filter(x=>eff[x.k]>lim).map(x=>x.n)};
+const startOf=f=>{const s=(f&&f.start)||{},o={};STATS.forEach(x=>{const v=Math.round(+s[x.k]);o[x.k]=Number.isFinite(v)?Math.min(11,Math.max(0,v)):9});return o};
+const START_TEMPLATE=[11,10,10,9,9,9,9,9];
+const validStart=st=>{const v=STATS.map(x=>st[x.k]).sort((a,b)=>b-a);return v.every((L,i)=>L<=START_TEMPLATE[i])};
+const startQuota=st=>{const q={11:0,10:0,9:0,low:0};STATS.forEach(x=>{const L=st[x.k];if(L>=9)q[L]++;else q.low++});return q};
+const rev=id=>Object.assign({status:"pending",cyStatus:"pending",history:[]},S.reviews[id]||{});
+const award=id=>{const r=rev(id);return Object.assign({sp:0,wins:0,losses:0,note:"",extraTraits:0,log:[]},S.awards[id]||{},{status:r.status,cyStatus:r.cyStatus})};
+const traitSlots=id=>BASE_TRAIT_SLOTS+Math.max(0,+award(id).extraTraits||0);
+const power=st=>STATS.reduce((s,x)=>s+st[x.k],0)/STATS.length;
+const ctrlIssue=st=>{const g=rIdx(st.gp),c=rIdx(st.ctrl);if(c>g+3)return"over";if(g-c>=3)return"degrade";return null};
+const validId=id=>typeof id==="string"&&/^[0-9a-f]{32}$/.test(id);
+const imgSrc=id=>validId(id)?(window.BLOB_BASE||"")+id:"";
+const galleryOf=(f,field)=>(Array.isArray(f&&f[field||"gallery"])?f[field||"gallery"]:[]).filter(g=>g&&validId(g.id));
+const pool=()=>(Array.isArray(S.config.art)?S.config.art:[]).filter(g=>g&&validId(g.id));
+function hash(s){let h=0;for(const ch of String(s))h=(h*31+ch.charCodeAt(0))|0;return Math.abs(h)}
+/* медиа-элемент: картинка или видео (видео без звука, по кругу) */
+function media(item,extra){if(!item)return"";const src=imgSrc(item.id);if(!src)return"";
+  return item.kind==="video"?`<video src="${src}" muted loop playsinline autoplay preload="metadata" ${extra||""}></video>`:`<img src="${src}" alt="${esc(item.cap||"")}" loading="lazy" onerror="this.style.visibility='hidden'" ${extra||""}>`}
+const poolPick=(n,seed)=>{const p=pool().filter(x=>x.kind!=="video");return p.length?p[(seed+n)%p.length]:null};
+const coverOf=f=>{const g=galleryOf(f);const firstImg=g.find(x=>x.kind!=="video")||g[0];return firstImg||(validId(f.avatarId)?{id:f.avatarId,kind:"image"}:null)};
+function avatarHTML(f,id,cls){const src=imgSrc(f.avatarId)||(coverOf(f)&&coverOf(f).kind!=="video"?imgSrc(coverOf(f).id):"");return `<span class="${cls||"av"}">${src?`<img src="${src}" alt="" loading="lazy" onerror="this.remove()">`:esc(initial(f.name))}</span>`}
+
+/* оригинальная манга-графика для пустых панелей: линии скорости + звуковой эффект */
+const SFXW=["БАМ!","ДООН!","ХВАК!","БУМ!","ВЖУХ!","ТРАХ!","ГРОХ!","ЩЁЛК!"];
+function speedArt(seed,word){
+  const cx=[0.5,0.8,0.2,0.65][seed%4]*600,cy=[0.5,0.3,0.7,0.45][(seed>>1)%4]*400;let l="";
+  for(let i=0;i<70;i++){const a=(i/70)*Math.PI*2+(seed%7)*.05,r1=40+((i*37+seed)%60),r2=900;
+    l+=`<line x1="${(cx+Math.cos(a)*r1).toFixed(1)}" y1="${(cy+Math.sin(a)*r1).toFixed(1)}" x2="${(cx+Math.cos(a)*r2).toFixed(1)}" y2="${(cy+Math.sin(a)*r2).toFixed(1)}" stroke="#fff" stroke-width="${i%5===0?3.2:1}" stroke-opacity="${i%5===0?.5:.22}"/>`}
+  const bg=["#E2001A","#141418","#1E1E26","#0B0B0C"][seed%4];
+  return `<svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="600" height="400" fill="${bg}"/>${l}
+   <circle cx="${cx}" cy="${cy}" r="34" fill="${bg}"/>${word?`<text x="${cx}" y="${cy+22}" text-anchor="middle" font-family="Rubik Mono One,Arial Black,sans-serif" font-size="${word.length>4?50:68}" fill="#FFD400" stroke="#0B0B0C" stroke-width="7" paint-order="stroke" transform="rotate(-8 ${cx} ${cy})">${word}</text>`:""}</svg>`}
+const artOr=(item,seed,word)=>item?media(item):speedArt(seed,word);
+
+function go(r,view){S.route=r;S.view=view||null;try{history.replaceState(null,"",r==="view"?"#f-"+view:"#"+r)}catch(e){}render();window.scrollTo(0,0)}
+document.getElementById("tabs").addEventListener("click",e=>{const b=e.target.closest("button[data-r]");if(b)go(b.dataset.r)});
+document.getElementById("home").onclick=()=>go("list");
+
+async function resolveNames(){
+  if(!S.user)return;const ids=Object.keys(S.fighters);if(!ids.length)return;
+  try{const ps=await S.user.profiles(ids);let ch=false;for(const id of ids){const n=ps[id]?.name||"";if(S.names[id]!==n){S.names[id]=n;ch=true}}if(ch&&!["edit","gm"].includes(S.route)&&!S.busy)render()}catch(e){}
+}
+function render(){
+  if(window.GOH_RECOVERY){window.renderAuth("recover");return}
+  const lo=document.getElementById("logout");if(lo)lo.hidden=!S.uid;
+  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",String(b.dataset.r===S.route||(S.route==="view"&&b.dataset.r==="list"))));
+  document.getElementById("tab-gm").hidden=!S.owner;
+  artButton();
+  const tq=document.getElementById("tab-q");tq.hidden=!isReviewer();
+  if(isReviewer()){const n=Object.keys(S.fighters).filter(id=>{const r=rev(id);return r.status==="pending"||(!cyOf(S.fighters[id]).none&&r.cyStatus==="pending")}).length;tq.innerHTML="Анкеты"+(n?`<span class="badge">${n}</span>`:"")}
+  document.getElementById("tabs").hidden=S.route==="start";
+  if(S.chatUnsub&&!(S.route==="view"&&S.viewTab==="check")){S.chatUnsub();S.chatUnsub=null}
+  if(!S.ready){app.innerHTML='<p class="muted">Загружаю реестр бойцов…</p>';return}
+  if(S.route==="rules"){renderRules();return}
+  if(!S.db&&S.route==="start"&&(S.startStep||"splash")==="splash"){renderStart();return}
+  if(!S.db){app.innerHTML=`<div class="notice warn">${window.GOH_READY?"Не удалось подключиться к базе. Проверь интернет и обнови страницу.":"Сайт ещё не подключён к базе: впиши ключи Supabase в файл app/config.js (см. README)."} Вкладка «Система» работает и без подключения.</div>`;return}
+  if(S.route==="start"){renderStart();return}
+  ({list:renderList,view:renderView,edit:renderEdit,gm:renderGM,compare:renderCompare,queue:renderQueue}[S.route]||renderList)();
+}
+function plural(n,a,b,c){const m=n%10,h=n%100;return m===1&&h!==11?a:m>=2&&m<=4&&(h<10||h>=20)?b:c}
+
+/* ===== Главная ===== */
+function heroHTML(n){
+  const p=pool();const cells=[0,1,2,3,4].map(i=>`<div class="c c${i+1}">${slot("hero"+(i+1),i,i*3+1,i===0?"":SFXW[i])}</div>`).join("");
+  return `<section class="hero"><div class="collage">${cells}</div><div class="bang">${p.length?"":"ДООН!"}</div>
+   <div class="cap"><span class="tag">Турнир «Бог старшей школы» · ТРП</span><h1>РЕЕСТР БОЙЦОВ</h1>
+   <p>${n} ${plural(n,"боец","бойца","бойцов")} в реестре. Анкеты, ранги параметров, запас GP, галереи артов и история прокачки каждого игрока.</p></div></section>`;
+}
+function renderList(){
+  const ids=Object.keys(S.fighters);const q=(S.q||"").toLowerCase(),sort=S.sort||"pw";
+  let rows=ids.map(id=>({id,f:S.fighters[id],a:award(id),st:effOf(S.fighters[id])}))
+    .filter(r=>!q||[r.f.name,r.f.alias,r.f.school,r.f.org,r.f.team,r.f.style,cyOf(r.f).name,r.f.race].join(" ").toLowerCase().includes(q));
+  rows.sort(sort==="name"?(x,y)=>(x.f.name||"").localeCompare(y.f.name||"","ru"):sort==="gp"?(x,y)=>y.st.gp-x.st.gp:(x,y)=>power(y.st)-power(x.st));
+  const mine=S.uid&&S.fighters[S.uid];
+  app.innerHTML=`${heroHTML(ids.length)}
+  <div class="listhead"><h2 style="font-size:28px">ВСЕ БОЙЦЫ</h2>
+    <div class="tools">
+      <div class="field"><label for="q">Поиск</label><input class="input" id="q" placeholder="имя, школа, чарёк" value="${esc(S.q||"")}"></div>
+      <div class="field"><label for="sort">Сортировка</label><select class="input" id="sort">
+        <option value="pw"${sort==="pw"?" selected":""}>По общей силе</option><option value="gp"${sort==="gp"?" selected":""}>По запасу GP</option><option value="name"${sort==="name"?" selected":""}>По имени</option></select></div>
+      ${S.uid&&!mine?`<div class="field" style="justify-content:end"><button class="btn primary" type="button" data-go="edit">+ Мой боец</button></div>`:""}
+    </div></div>
+  ${ids.length?(rows.length?`<div class="roster">${rows.map(card).join("")}</div>`:`<p class="muted">Никого не нашлось по запросу «${esc(S.q)}».</p>`)
+  :`<div class="empty"><span class="sfx" style="font-size:40px;color:var(--red)">ПУСТО!</span><h2>Здесь появятся анкеты всех игроков</h2>
+    <p class="muted" style="margin:0;max-width:54ch">Каждый игрок создаёт бойца во вкладке «Мой боец» и заливает арты в его галерею. ГМ одобряет анкету и начисляет SP.</p>
+    <button class="btn primary" type="button" data-go="edit">Создать своего бойца</button></div>`}`;
+  const qi=document.getElementById("q");qi.oninput=()=>{S.q=qi.value;const p=qi.selectionStart;renderList();const n=document.getElementById("q");n.focus();n.setSelectionRange(p,p)};
+  document.getElementById("sort").onchange=e=>{S.sort=e.target.value;renderList()};
+  app.querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>go("view",b.dataset.id));
+  app.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(b.dataset.go));
+}
+function card({id,f,a,st}){const P=Math.round(power(st)),cv=coverOf(f),gc=galleryOf(f).length+galleryOf(f,"cyGallery").length;
+  return `<button class="fcard" type="button" data-id="${esc(id)}">
+    <span class="cover">${cv?media(cv):speedArt(hash(id),"")+`<span class="mono">${esc(initial(f.name))}</span>`}<span class="rankburst">${label(P)}</span>${gc?`<span class="gcount">${gc} ${plural(gc,"арт","арта","артов")}</span>`:""}</span>
+    <span class="nmband"><span class="nm">${esc(f.name||"Без имени")}</span>
+      <span class="sub">${f.alias?"«"+esc(f.alias)+"» · ":""}${esc(cyOf(f).name&&!cyOf(f).none?"Чарёк: "+cyOf(f).name:(f.style||"стиль не указан"))} · ${tierCode(P)}</span>
+      ${statusPill(a.status,"Анкета")}</span></button>`}
+
+/* ===== Анкеты: пункты ===== */
+const CY_TYPES=[["Призыв и усиление оружия", "Чарёк проявляется как сила, которую пользователь призывает в качестве оружия и/или использует для усиления своего текущего оружия. Пример — щит «Эгида» На Хансона: самостоятельное оружие, которым можно усиливать меч. Другие примеры — «Бастард» Чан Чанми и «Молот» Джин Пумгвана."], ["Призыв героя", "Чарёк проявляется в виде отдельной сущности или предмета, которым управляет пользователь. Обычно это божество, герой или зверь, сыгравший важную роль в истории человечества. Сущность можно «прикрепить» к пользователю, изменив его облик и усилив природные способности. Чарёк может быть невидим для всех, кроме пользователя, пока тот не решит его показать. Примеры: Король Земли и Хэтэ."], ["Паразитический", "Сущность живёт в теле пользователя, распространяется и становится сильнее с каждым использованием. Неизвестно, что произойдёт при полном распространении: предполагается, что пользователь либо обретёт огромную силу, либо будет поглощён. Примеры: Жадность и Яматано Ороти."], ["Интуитивный", "Основан не на реальных объектах или легендах, а исключительно на воображении пользователя. На него влияют психологическое состояние пользователя и его отношения с другими людьми. Примеры: «Над небесами и под ними, только я — Великий» и «Мастер подземелий — Царь Вавилона»."], ["Прямой контракт", "Бог напрямую наделяет человека силой, обычно вступая с ним в контакт в пределах своего Царства. Прямой контракт позволяет эффективнее взаимодействовать с богом, который даёт силу. Это следующий уровень обычного Чарёка. Примеры: Девятихвостый страж, Король быков, Хэтэ и Ё По Бон Сон."], ["Одалживание силы / прямое наследование", "Продвинутая форма прямого контракта: получающий силу становится аватаром бога, принимает его облик и получает доступ ко всему спектру его силы. Возможно только для прямого потомка этого бога. Примеры: Сэмюэл Росинант, Хосе Наташа Виолета Александерс и Судья Кью — потомки Геракла, Филиппа II и Джокера."], ["Ключ", "Редкий и очень мощный тип чарёка, который может запечатывать и пробуждать способности как у смертных, так и у богов — «существование, способное низвергнуть богов с небес». Ключи порождены сильной ненавистью и гневом: боги, чья сила в них заключена, противостоят богам небес и жаждут мести. Примеры: Пандора и Девятихвостый страж."], ["Изначальный способ заимствования силы", "Доступен только тем, кто нарушил табу. Один из самых мощных видов чарёка: боги напрямую вливают божественную энергию в тело контрактора. Существенный недостаток — пользователь может стать старше или моложе. Пример: «Тринити: боги ветра, дождя и облаков»."]];
+const CHAR_GROUPS=[
+ {t:"Основное",f:[["discord","Ник в Discord *","s",40,"чтобы знать, чей это персонаж"],["name","Имя бойца","s",80],["alias","Псевдоним / прозвище","s",80],["age","Возраст","s",40],["gender","Пол","s",40],["height","Рост / вес","s",60],["birthday","День рождения","s",40],
+   ["race","Раса / тип контракта","s",80,"человек, небожитель, контрактор…"],["school","Школа / регион","s",80],["org","Организация / фракция","s",120,"NOX, Судьи, клан, бездомные…"],["team","Команда","s",80],["role","Роль в бою","s",80,"штурмовик, танк, поддержка…"],["style","Стиль боя","s",120,"Ре-Тхэквондо, кэндо, бокс…"]]},
+ {t:"Личность",f:[["quote","Фраза персонажа","s",200,"коронная фраза или девиз"],["personality","Характер","l",4000],["likes","Любит","l",1500],["dislikes","Не любит","l",1500],["fears","Страхи","l",1500],["goal","Цель / мечта","l",1500],["habits","Привычки и причуды","l",1500]]},
+ {t:"Сила и слабость",f:[["strengths","В чём силён","l",3000],["weaknesses","Слабые места","l",3000],["techniques","Техники боевых искусств","list",4000]]},
+ {t:"История",f:[["appearance","Внешность","l",4000],["bio","Биография","l",8000],["relations","Связи и отношения","l",3000],["theme","Тема персонажа","s",200,"песня, образ, лейтмотив"]]}];
+const CY_GROUPS=[
+ {t:"Основное",f:[["name","Название чарёка","s",120,"имя бога, существа или артефакта"],["kind","Тип чарёка","sel",0,[""].concat(CY_TYPES.map(x=>x[0]))],
+   ["myth","Мифология / происхождение","s",120,"китайская, скандинавская, корейская…"]]},
+ {t:"Контракт",f:[["contract","Как заключён контракт","l",4000],["terms","Условия и цена контракта","l",3000],["bond","Отношения с носителем","l",3000],["creed","Слова чарёка","s",200,"что говорит бог носителю"]]},
+ {t:"Проявление",f:[["look","Как выглядит призыв","l",3000],["abilities","Способности чарёка","list",5000],["ultimate","Ультимативная техника / финальная форма","l",3000],["passive","Пассивные эффекты","l",3000]]},
+ {t:"Баланс",f:[["strengths","Сильные стороны","l",3000],["weaknesses","Слабые места и ограничения","l",3000],["cost","Расход GP и откат","l",2000]]}];
+const ALL_CHAR=CHAR_GROUPS.flatMap(g=>g.f), ALL_CY=CY_GROUPS.flatMap(g=>g.f);
+const cyOf=f=>(f&&f.cy&&typeof f.cy==="object")?f.cy:{};
+const lines=v=>String(v||"").split("\n").map(s=>s.trim()).filter(Boolean);
+
+/* ===== Профиль ===== */
+const canEditGallery=id=>id===S.uid||S.owner;
+function statusPill(st,what){const p=what?what+": ":"";return st==="approved"?`<span class="pill ok">${p}одобрена</span>`:st==="rework"?`<span class="pill bad">${p}на доработке</span>`:`<span class="pill pend">${p}на проверке</span>`}
+function textSec(t,v,cls){return v?`<section class="sec"><h2>${t}</h2><p class="${cls||""}">${esc(v)}</p></section>`:""}
+const TECH_MAX=25,TECH_COUNT=30;
+const techBon=t=>{const o={};STATS.forEach(x=>o[x.k]=Math.max(0,Math.min(TECH_MAX,Math.round(+((t&&t.bonuses)||{})[x.k]||0))));return o};
+function listOf(obj,k){if(!obj)return[];const L=obj[k+"List"];if(Array.isArray(L))return L.filter(x=>x&&typeof x==="object");return lines(obj[k]).map(line=>{const m=line.split(/\s+[—–-]\s+/);return{name:m[0]||line,desc:m.slice(1).join(" — "),bonuses:{}}})}
+function techSec(t,list,st){const l=list.filter(x=>x.name||x.desc);if(!l.length)return"";return `<section class="sec"><h2>${t}</h2><div class="techcards">${l.map(x=>{const b=techBon(x);const tags=STATS.filter(z=>b[z.k]).map(z=>`<span class="tbonus mode">${esc(z.n)} +${b[z.k]}${st?` → ${label(Math.min(MAXL,st[z.k]+b[z.k]))}`:""}</span>`).join("");
+  return `<div class="techcard"><b>${esc(x.name||"Без названия")}</b>${x.desc?`<p>${esc(x.desc)}</p>`:""}${tags?`<div class="tbonuses"><span class="lbl" style="width:100%">при использовании</span>${tags}</div>`:""}</div>`}).join("")}</div></section>`}
+function listSec(t,v){const l=lines(v);return l.length?`<section class="sec"><h2>${t}</h2><ul class="tech">${l.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></section>`:""}
+function duo(t,a,b,la,lb){if(!a&&!b)return"";return `<section class="sec"><h2>${t}</h2><div class="duo">${a?`<div class="duo-c good"><b>${la}</b><p>${esc(a)}</p></div>`:""}${b?`<div class="duo-c bad"><b>${lb}</b><p>${esc(b)}</p></div>`:""}</div></section>`}
+function factsGrid(pairs){const p=pairs.filter(x=>x[1]);return p.length?`<div class="factgrid">${p.map(([k,v])=>`<div><span class="lbl">${k}</span><b>${esc(v)}</b></div>`).join("")}</div>`:""}
+
+function renderView(){
+  const id=S.view,f=S.fighters[id];
+  if(!f){app.innerHTML=`<div class="notice">Этого бойца нет в реестре. <button class="btn sm" type="button" id="back">К списку</button></div>`;document.getElementById("back").onclick=()=>go("list");return}
+  const a=award(id),base=statsOf(f),st=effOf(f),bon=traitBonusOf(f.traits),start=startOf(f),P=Math.round(power(st)),sp=spentSP(base,start),free=(a.sp||0)-sp,cy=cyOf(f);
+  const traits=(Array.isArray(f.traits)?f.traits:[]).filter(t=>t&&(t.name||t.desc));
+  const g1=galleryOf(f,"gallery"),g2=galleryOf(f,"cyGallery"),cv=coverOf(f),bg=g1[1]&&g1[1].kind!=="video"?g1[1]:cv||poolPick(0,hash(id));
+  const ci=ctrlIssue(st),maxL=Math.max(...STATS.map(s=>st[s.k]))+3;let tab=S.viewTab||"char";if(tab==="check"&&!canSeeCheck(id))tab="char";
+  const T=(k,n)=>`<button type="button" data-vt="${k}" aria-pressed="${tab===k}">${n}</button>`;
+  let body="";
+  if(tab==="char")body=`
+    ${f.quote?`<div class="bubble big"><p>«${esc(f.quote)}»</p></div>`:""}
+    ${traits.length?`<section class="sec"><h2>Трейты</h2><div class="traits">${traits.map(t=>`<div class="trait"><b>${esc(t.name||"Без названия")}</b>${bonusTags(t)?`<span class="tbonuses">${bonusTags(t)}</span>`:""}${t.desc?`<span>${esc(t.desc)}</span>`:""}${modeOf(t)?`<div class="modebox"><b>⚡ Режим «${esc(modeOf(t).name)}»</b><span class="tbonuses">${modeTags(modeOf(t))}</span></div>`:""}</div>`).join("")}</div></section>`:""}
+    ${textSec("Характер",f.personality)}
+    ${duo("Предпочтения",f.likes,f.dislikes,"♥ Любит","✕ Не любит")}
+    ${factsGrid([["Цель / мечта",f.goal],["Страхи",f.fears],["Привычки и причуды",f.habits]])}
+    ${duo("Сила и слабость",f.strengths,f.weaknesses,"В чём силён","Слабые места")}
+    ${techSec("Техники боевых искусств",listOf(f,"techniques"),st)}
+    ${textSec("Внешность",f.appearance)}${textSec("Биография",f.bio)}${textSec("Связи и отношения",f.relations)}
+    ${f.theme?`<section class="sec"><h2>Тема персонажа</h2><p>♪ ${esc(f.theme)}</p></section>`:""}
+    ${![f.personality,f.bio,f.appearance,f.likes,f.strengths,f.techniques].some(Boolean)&&!traits.length?`<p class="muted">Игрок ещё не заполнил анкету персонажа.</p>`:""}`;
+  if(tab==="cy")body=cy.none?`<div class="empty"><span class="sfx" style="font-size:30px">БЕЗ ЧАРЁКА</span><span class="muted">Этот боец сражается только боевыми искусствами.</span></div>`:`
+    <div class="cyhead pnl"><div class="cyart">${g2[0]&&g2[0].kind!=="video"?`<img src="${imgSrc(g2[0].id)}" alt="">`:speedArt(hash(id)+5,"")}</div>
+     <div class="cyinfo"><span class="eyebrow">Чарёк</span><h2 style="font-size:28px">${esc(cy.name||"Не назван")}</h2>
+      ${factsGrid([["Тип",cy.kind],["Мифология",cy.myth]])}
+      ${cy.creed?`<div class="bubble"><p>«${esc(cy.creed)}»</p></div>`:""}${statusPill(a.cyStatus,"Анкета чарёка")}</div></div>
+    ${textSec("Как заключён контракт",cy.contract)}${textSec("Условия и цена контракта",cy.terms)}${textSec("Отношения с носителем",cy.bond)}
+    ${textSec("Как выглядит призыв",cy.look)}${techSec("Способности",listOf(cy,"abilities"),st)}
+    ${cy.ultimate?`<section class="sec"><h2>Ультимативная техника</h2><div class="ult">${esc(cy.ultimate)}</div></section>`:""}
+    ${textSec("Пассивные эффекты",cy.passive)}
+    ${duo("Баланс",cy.strengths,cy.weaknesses,"Сильные стороны","Слабые места и ограничения")}
+    ${textSec("Расход GP и откат",cy.cost)}
+    ${![cy.contract,cy.look,cy.abilities,cy.ultimate].some(Boolean)?`<p class="muted">Анкета чарёка ещё не заполнена.</p>`:""}`;
+  if(tab==="check"&&canSeeCheck(id))body=checkBody(id);
+  if(tab==="gal")body=galleryBlock(id,"gallery","Арты персонажа",g1)+galleryBlock(id,"cyGallery","Арты чарёка",g2);
+  app.innerHTML=`<section class="spread">${bg&&bg.kind!=="video"?`<img class="bgart" src="${imgSrc(bg.id)}" alt="" onerror="this.remove()">`:`<span class="bgart">${speedArt(hash(id)+2,"")}</span>`}<span class="shade"></span>
+    <div class="in"><div class="portrait">${cv&&cv.kind!=="video"?`<img src="${imgSrc(cv.id)}" alt="">`:esc(initial(f.name))}</div>
+     <div style="display:grid;gap:6px;min-width:0"><div class="crumbs"><button class="linkbtn" type="button" id="back">← Реестр бойцов</button></div>
+      <span class="eyebrow" style="color:var(--hot)">${f.alias?"«"+esc(f.alias)+"»":"Боец турнира"}</span>
+      <h1>${esc(f.name||"Без имени")}</h1>
+      <span class="meta">Игрок: ${esc(f.discord||playerName(id))} · сила ${label(P)} · ${tierCode(P)}, ${TIERS[tierIdx(P)].toLowerCase()}${cy.name&&!cy.none?" · чарёк: "+esc(cy.name):""}</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${statusPill(a.status,"Персонаж")}${cy.none?"":statusPill(a.cyStatus,"Чарёк")}${id===S.uid?`<button class="btn sm primary" type="button" id="toedit">Редактировать анкеты</button>`:""}</div></div></div></section>
+  ${free<0?`<div class="notice bad" style="margin-bottom:14px">Потрачено ${fmt(sp)} SP при ${fmt(a.sp)} заработанных. ГМу стоит проверить анкету.</div>`:""}
+  ${!validStart(start)?`<div class="notice bad" style="margin-bottom:14px">Стартовые ранги нарушают правило 5×C-, 2×C, 1×C+.</div>`:""}
+  ${skewIssues(st).length?`<div class="notice bad" style="margin-bottom:14px">Перекос параметров: ${esc(skewIssues(st).join(", "))} выше среднего уровня бойца больше чем на 1 тир.</div>`:""}
+  ${traits.length>traitSlots(id)?`<div class="notice bad" style="margin-bottom:14px">Трейтов больше, чем слотов (${traits.length} из ${traitSlots(id)}).</div>`:""}
+  ${ci==="degrade"?`<div class="notice warn" style="margin-bottom:14px">Запас GP опережает Контроль Чарёка на 3+ ранга: при использовании способностей контроль деградирует до человеческого уровня (x1.5).</div>`:""}
+  <div class="tabs2">${T("char","Анкета персонажа")}${T("cy","Анкета чарёка")}${T("gal",`Галерея · ${g1.length+g2.length}`)}${canSeeCheck(id)?T("check","Проверка и чат"):""}</div>
+  <div class="article"><div class="body">${body}</div>
+   <aside class="infobox">
+    <div class="ib-head"><span class="n">${esc(f.name||"Без имени")}</span><span class="r">${label(P)}</span></div>
+    <dl class="facts">
+      <dt>Тир</dt><dd>${tierCode(P)}</dd>
+      ${[["discord","Discord"],["alias","Псевдоним"],["age","Возраст"],["gender","Пол"],["height","Рост / вес"],["birthday","День рождения"],["race","Раса / контракт"],["school","Школа / регион"],["org","Организация"],["team","Команда"],["role","Роль в бою"],["style","Стиль боя"]].filter(([k])=>f[k]).map(([k,l])=>`<dt>${l}</dt><dd>${esc(f[k])}</dd>`).join("")}
+      <dt>Чарёк</dt><dd>${cy.none?"нет":esc(cy.name||"—")}</dd>
+      <dt>Энергия GP</dt><dd><b>${fmt(gpTotal(st.gp))}</b> ед.</dd>
+      <dt>Расход GP</dt><dd>x${ctrlMult(st.ctrl)}${ci==="degrade"?' <span class="pill bad">деградирует</span>':""}</dd>
+      <dt>SP</dt><dd>${fmt(free)} свободно из ${fmt(a.sp)}</dd>
+    </dl>
+    <div class="ib-sec"><h3>Параметры · старт → сейчас</h3>
+      ${STATS.map(s=>`<div class="statrow"><span>${s.n}<br><span class="tier">старт ${label(start[s.k])}${bon[s.k]?` · база ${label(base[s.k])} +${bon[s.k]}`:""} · ${tierCode(st[s.k])}</span></span><span class="bar"><i style="width:${Math.max(4,(st[s.k]+1)/(maxL+1)*100)}%"></i></span><span class="v">${label(st[s.k])}</span>${modeLines(modesOf(f.traits),s.k,st[s.k])?`<span class="modecol">${modeLines(modesOf(f.traits),s.k,st[s.k])}</span>`:""}</div>`).join("")}</div>
+    <div class="ib-sec"><h3>Бои</h3><div class="record"><span class="w">${a.wins||0} побед</span><span class="l">${a.losses||0} поражений</span></div></div>
+    ${a.note?`<div class="ib-sec"><h3>Заметка ГМа</h3><div class="gmnote">${esc(a.note)}</div></div>`:""}
+   </aside></div>`;
+  document.getElementById("back").onclick=()=>go("list");
+  const te=document.getElementById("toedit");if(te)te.onclick=()=>go("edit");
+  app.querySelectorAll("[data-vt]").forEach(b=>b.onclick=()=>{S.viewTab=b.dataset.vt;renderView()});
+  if(tab==="check"&&canSeeCheck(id))mountCheck(id);
+  if(tab==="gal"){
+    [["gallery",g1],["cyGallery",g2]].forEach(([field,list])=>{
+      app.querySelectorAll(`[data-g="${field}"] .gi`).forEach(el=>el.addEventListener("click",e=>{if(e.target.closest(".gtools"))return;openLB(list,+el.dataset.gi,f.name)}));
+      if(canEditGallery(id))wireGallery(id,field)})}
+}
+function galleryBlock(id,field,title,gal){
+  const edit=canEditGallery(id);
+  return `<section class="sec gallery-sec" data-g="${field}"><div class="ghead"><h2>${title} · ${gal.length}</h2>${edit?`<span class="muted" style="font-size:13px">до ${GALLERY_MAX} файлов · картинки, GIF, видео MP4/WebM до 20 МБ</span>`:""}</div>
+   ${edit&&S.assets?`<label class="drop" data-drop for="gf-${field}"><span class="big">+ АРТЫ</span><span>Перетащи сюда файлы или нажми, чтобы выбрать. Можно сразу много.</span><span class="progress" data-prog></span></label><input type="file" id="gf-${field}" data-file accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml,video/mp4,video/webm" multiple hidden>`
+    :edit?`<div class="notice">Чтобы загружать арты, войди в свой аккаунт.</div>`:""}
+   ${gal.length?`<div class="masonry">${gal.map((g,i)=>`<figure class="gi" data-gi="${i}">${media(g)}${g.kind==="video"?'<span class="kind">ВИДЕО</span>':g.kind==="gif"?'<span class="kind">GIF</span>':""}
+     ${edit?`<span class="gtools"><button type="button" data-cap="${i}" title="Подпись">✎</button>${g.kind!=="video"&&field==="gallery"?`<button type="button" data-avatar="${i}" title="Сделать аватаром">★</button>`:""}<button type="button" data-up="${i}" title="Выше">↑</button><button type="button" data-rm="${i}" title="Удалить">✕</button></span>`:""}
+     ${g.cap?`<figcaption class="gcap">${esc(g.cap)}</figcaption>`:""}</figure>`).join("")}</div>`
+    :`<div class="empty" style="padding:22px"><span class="sfx" style="font-size:24px">ТИШИНА…</span><span class="muted">${edit?"Залей первые арты.":"Артов пока нет."}</span></div>`}
+   <div data-capbox></div></section>`;
+}
+function wireGallery(id,field){
+  const box=app.querySelector(`[data-g="${field}"]`);if(!box)return;
+  const fi=box.querySelector("[data-file]"),dz=box.querySelector("[data-drop]"),prog=box.querySelector("[data-prog]");
+  const err=m=>{if(prog){prog.style.color="var(--red)";prog.textContent=m}};
+  if(fi)fi.onchange=()=>addFiles(id,field,[...fi.files],prog);
+  if(dz){["dragenter","dragover"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add("over")}));
+    ["dragleave","drop"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove("over")}));
+    dz.addEventListener("drop",e=>addFiles(id,field,[...(e.dataTransfer?.files||[])],prog))}
+  const gal=()=>galleryOf(S.fighters[id],field).slice();
+  box.querySelectorAll("[data-rm]").forEach(b=>b.onclick=async()=>{
+    if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="точно?";setTimeout(()=>{if(b.isConnected){b.dataset.armed="";b.textContent="✕"}},3500);return}
+    const g=gal(),[item]=g.splice(+b.dataset.rm,1);if(await saveGallery(id,field,g,err)&&S.assets){try{await S.assets.delete(item.id)}catch(e){}}});
+  box.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>{const i=+b.dataset.up;if(!i)return;const g=gal();[g[i-1],g[i]]=[g[i],g[i-1]];saveGallery(id,field,g,err)});
+  box.querySelectorAll("[data-avatar]").forEach(b=>b.onclick=async()=>{const av=gal()[+b.dataset.avatar].id;try{await S.db.doc("fighters/"+id).update({avatarId:av});S.fighters[id]=Object.assign({},S.fighters[id],{avatarId:av});renderView()}catch(e){err("Не удалось сохранить.")}});
+  box.querySelectorAll("[data-cap]").forEach(b=>b.onclick=()=>{const i=+b.dataset.cap,g=gal(),cb=box.querySelector("[data-capbox]");
+    cb.innerHTML=`<div class="panel" style="margin-top:6px"><div class="field"><label for="capin">Подпись к арту ${i+1}</label><input class="input" id="capin" maxlength="140" value="${esc(g[i].cap||"")}"></div><div class="savebar"><button class="btn sm primary" type="button" id="capok">Сохранить подпись</button><button class="btn sm" type="button" id="capno">Отмена</button></div></div>`;
+    const inp=document.getElementById("capin");inp.focus();cb.scrollIntoView({block:"nearest"});
+    document.getElementById("capno").onclick=()=>cb.innerHTML="";
+    document.getElementById("capok").onclick=()=>{g[i]=Object.assign({},g[i],{cap:inp.value.trim().slice(0,140)});saveGallery(id,field,g,err)}});
+}
+async function saveGallery(id,field,g,err){
+  try{await S.db.doc("fighters/"+id).update({[field]:g});S.fighters[id]=Object.assign({},S.fighters[id],{[field]:g});renderView();return true}
+  catch(e){err&&err(e&&e.code==="invalid_argument"?"Нет прав на изменение этой галереи.":"Не удалось сохранить галерею.");return false}
+}
+function kindOf(file){const t=file.type||"";if(t.startsWith("video/"))return"video";if(t==="image/gif")return"gif";return"image"}
+async function prepFile(file){
+  const t=(file.type||"").toLowerCase();
+  const ok=["image/png","image/jpeg","image/gif","image/webp","image/svg+xml","video/mp4","video/webm"];
+  if(!ok.includes(t))throw{code:"unsupported_type"};
+  if(t==="image/svg+xml"&&file.size>2*1024*1024)throw{code:"too_large"};
+  if((t==="image/jpeg"||t==="image/png")&&file.size>4*1024*1024){const b=await shrink(file,2400);return{blob:b,type:"image/jpeg"}}
+  if(file.size>20*1024*1024)throw{code:"too_large"};
+  return{blob:file,type:t};
+}
+async function addFiles(id,field,files,prog){
+  if(!files.length||S.busy)return;
+  let g=galleryOf(S.fighters[id],field);const room=GALLERY_MAX-g.length;
+  const say=(m,c)=>{const p=app.querySelector(`[data-g="${field}"] [data-prog]`)||prog;if(p){p.style.color=c||"";p.textContent=m}};
+  if(room<=0){say(`В галерее уже ${GALLERY_MAX} файлов. Удали лишние.`,"var(--red)");return}
+  files=files.slice(0,room);S.busy=true;let done=0,fails=[];
+  for(const file of files){say(`Загружаю ${done+1} из ${files.length}…`);
+    try{const {blob,type}=await prepFile(file);const r=await S.assets.upload(blob,{type});g=g.concat({id:r.id,kind:kindOf({type}),cap:""});done++}
+    catch(e){fails.push(file.name+": "+upErr(e))}}
+  S.busy=false;
+  if(done)await saveGallery(id,field,g,m=>say(m,"var(--red)"));
+  say((done?`Добавлено: ${done}. `:"")+(fails.length?"Не загрузились: "+fails.join("; "):""),fails.length?"var(--red)":"var(--ok)");
+}
+/* лайтбокс */
+function openLB(list,i,title){
+  const root=document.getElementById("lbroot");let k=i;
+  const draw=()=>{const g=list[k];root.innerHTML=`<div class="lb" role="dialog" aria-modal="true" aria-label="Просмотр арта">
+    <div class="bar2"><b>${esc(title||"")} · ${k+1} / ${list.length}</b><button class="x" type="button" id="lbx">Закрыть ✕</button></div>
+    <div class="stage">${g.kind==="video"?`<video src="${imgSrc(g.id)}" controls autoplay loop playsinline></video>`:`<img src="${imgSrc(g.id)}" alt="${esc(g.cap||"")}">`}
+     ${list.length>1?`<button class="nav prev" type="button" id="lbp" aria-label="Предыдущий">‹</button><button class="nav next" type="button" id="lbn" aria-label="Следующий">›</button>`:""}</div>
+    <div class="lbcap">${esc(g.cap||"")}</div></div>`;
+    document.getElementById("lbx").onclick=close;const p=document.getElementById("lbp"),n=document.getElementById("lbn");
+    if(p)p.onclick=()=>{k=(k-1+list.length)%list.length;draw()};if(n)n.onclick=()=>{k=(k+1)%list.length;draw()};
+    root.querySelector(".lb").onclick=e=>{if(e.target.classList.contains("stage"))close()};document.getElementById("lbx").focus()};
+  const key=e=>{if(e.key==="Escape")close();if(e.key==="ArrowRight"&&list.length>1){k=(k+1)%list.length;draw()}if(e.key==="ArrowLeft"&&list.length>1){k=(k-1+list.length)%list.length;draw()}};
+  function close(){root.innerHTML="";document.removeEventListener("keydown",key)}
+  document.addEventListener("keydown",key);draw();
+}
+
+/* ===== Редактор ===== */
+const MINLEN={personality:500,bio:1000};
+const cntHTML=(k,v)=>MINLEN[k]?`<small class="cnt ${String(v||"").trim().length>=MINLEN[k]?"okc":"low"}" data-cnt="${k}">${String(v||"").trim().length} / мин. ${MINLEN[k]} символов</small>`:"";
+function fieldHTML(spec,val,pfx){
+  const [k,l,type,mx,extra]=spec,id=`${pfx}-${k}`;
+  if(type==="sel"){const hint=k==="kind"&&pfx==="y"?(CY_TYPES.find(x=>x[0]===val)||[])[1]:"";return `<div class="field${hint?" full":""}"><label for="${id}">${l}</label><select class="input" id="${id}" data-${pfx}="${k}">${extra.map(o=>`<option value="${esc(o)}"${o===(val||"")?" selected":""}>${o?esc(o):"— выбрать —"}</option>`).join("")}</select>${hint?`<div class="cyhint">${esc(hint)}</div>`:""}</div>`}
+  if(type==="s")return `<div class="field"><label for="${id}">${l}</label><input class="input" id="${id}" data-${pfx}="${k}" value="${esc(val||"")}" placeholder="${esc(extra||"")}" maxlength="${mx}"></div>`;
+  if(type==="list"){const obj=pfx==="c"?S.draft:S.draft.cy;if(!Array.isArray(obj[k+"List"]))obj[k+"List"]=listOf(obj,k);const L=obj[k+"List"];const one=k==="abilities"?"Способность":"Техника";
+    return `<div class="field full"><span class="lbl">${l} · ${L.length}</span><div class="techedit">${L.map((t,i)=>{const b=techBon(t);const tg=`${pfx}|${k}|${i}`;return `<div class="techrow"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b style="font:15px var(--display)">${one} ${i+1}</b><button class="btn sm danger" type="button" data-tdel="${tg}">Удалить</button></div>
+      <div class="field"><label for="tl-${tg}-n">Название</label><input class="input" id="tl-${tg}-n" data-tl="${tg}" data-tlf="name" maxlength="80" value="${esc(t.name||"")}"></div>
+      <div class="field"><label for="tl-${tg}-d">Описание</label><textarea class="input" id="tl-${tg}-d" data-tl="${tg}" data-tlf="desc" maxlength="2000" style="min-height:70px">${esc(t.desc||"")}</textarea></div>
+      <details${STATS.some(x=>b[x.k])?" open":""}><summary>Бонусы к параметрам при использовании</summary><div class="bonusgrid" style="margin-top:8px">${STATS.map(x=>`<div class="field"><label for="tl-${tg}-${x.k}">${x.n}</label><select class="input" id="tl-${tg}-${x.k}" data-tlb="${tg}" data-tlk="${x.k}">${Array.from({length:TECH_MAX+1},(_,v)=>`<option value="${v}"${b[x.k]===v?" selected":""}>${v?"+"+v:"0"}</option>`).join("")}</select></div>`).join("")}</div></details></div>`}).join("")}
+      ${L.length<TECH_COUNT?`<button class="btn" type="button" data-tadd="${pfx}|${k}">+ Добавить ${one.toLowerCase()==="техника"?"технику":"способность"}</button>`:""}</div></div>`}
+  return `<div class="field full"><label for="${id}">${l}${pfx==="c"&&MINLEN[k]?" *":""}</label><textarea class="input" id="${id}" data-${pfx}="${k}" maxlength="${mx}"${type==="list"?' placeholder="Название — описание"':""}${pfx==="c"&&MINLEN[k]?' style="min-height:180px"':""}>${esc(val||"")}</textarea>${pfx==="c"?cntHTML(k,val):""}</div>`;
+}
+function renderEdit(){
+  if(!S.uid){app.innerHTML=`<div class="notice warn">Чтобы создать бойца, войди в аккаунт или зарегистрируйся.</div>`;return}
+  const cur=S.fighters[S.uid];
+  if(!S.draft){S.draft=JSON.parse(JSON.stringify(cur||{name:""}));S.draft.stats=statsOf(cur);S.draft.start=startOf(cur);S.draft.cy=Object.assign({},cyOf(cur));S.draft.traits=Array.isArray(S.draft.traits)?S.draft.traits:[];
+    if(!cur)STATS.forEach(s=>S.draft.stats[s.k]=S.draft.start[s.k]);if(!S.draft.discord&&S.players[S.uid])S.draft.discord=S.players[S.uid].discord||""}
+  const d=S.draft,a=award(S.uid),slots=traitSlots(S.uid),tab=S.editTab||"char";
+  while(d.traits.length<slots)d.traits.push({name:"",desc:""});
+  const startLocked=a.status==="approved"&&!S.owner;
+  const sp=spentSP(d.stats,d.start),free=(a.sp||0)-sp,cc=cumCost(),bon=traitBonusOf(d.traits.slice(0,slots)),eff=effFrom(d.stats,d.traits.slice(0,slots)),gpR=rIdx(eff.gp),ci=ctrlIssue(eff);
+  const tryEff=(k,dl)=>{const nb=Object.assign({},d.stats);nb[k]+=dl;return effFrom(nb,d.traits.slice(0,slots))};
+  const canUp=k=>{const L=d.stats[k];if(L>=MAXL||eff[k]>=MAXL)return false;if(cc[L+1]-cc[L]>free)return false;const ne=tryEff(k,1);if(k==="ctrl"&&rIdx(ne.ctrl)>rIdx(ne.gp)+3)return false;if(skewIssues(ne).length>skewIssues(eff).length||ne[k]>skewLimit(ne))return false;return true};
+  const canDown=k=>{const L=d.stats[k];if(L<=d.start[k])return false;const ne=tryEff(k,-1);if(k==="gp"&&rIdx(ne.ctrl)>rIdx(ne.gp)+3)return false;return true};
+  const T=(k,n)=>`<button type="button" data-et="${k}" aria-pressed="${tab===k}">${n}</button>`;
+  const q=startQuota(d.start);
+  let left="";
+  if(tab==="char")left=CHAR_GROUPS.map(g=>`<div class="panel"><h2>${g.t}</h2><div class="formgrid">${g.f.map(sp=>fieldHTML(sp,d[sp[0]],"c")).join("")}</div></div>`).join("")+
+    `<div class="panel"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline"><h2>Трейты</h2><span class="muted" style="font-size:13px">${slots} ${plural(slots,"слот","слота","слотов")} · доп. слоты выдаёт ГМ</span></div>
+     <p class="muted" style="margin:0;font-size:13.5px">Трейт — особенность персонажа: врождённый дар, черта тела или психики, наследие рода.</p>
+     ${d.traits.slice(0,slots).map((t,i)=>{const b=traitBon(t);return `<div class="traitedit"><div class="field"><label for="tn${i}">Трейт ${i+1}: название</label><input class="input" id="tn${i}" data-ti="${i}" data-tf="name" maxlength="60" value="${esc(t.name)}"></div>
+       <div class="field"><label for="td${i}">Описание</label><textarea class="input" id="td${i}" data-ti="${i}" data-tf="desc" maxlength="1500" style="min-height:64px">${esc(t.desc)}</textarea></div>
+       <span class="lbl">Бонусы к параметрам</span><div class="bonusgrid">${STATS.map(x=>`<div class="field"><label for="tb${i}-${x.k}">${x.n}</label><select class="input" id="tb${i}-${x.k}" data-tb="${i}" data-tbk="${x.k}">${Array.from({length:TRAIT_MAX+1},(_,v)=>`<option value="${v}"${b[x.k]===v?" selected":""}>${v?"+"+v:"0"}</option>`).join("")}</select></div>`).join("")}</div>
+       <label style="display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer"><input type="checkbox" data-mon="${i}" ${t.mode&&t.mode.on?"checked":""} style="width:20px;height:20px"> Трейт даёт режим (временное усиление)</label>
+       ${t.mode&&t.mode.on?`<div class="modeedit"><div class="field"><label for="mn${i}">Название режима</label><input class="input" id="mn${i}" data-mname="${i}" maxlength="60" placeholder="например, Режим ярости" value="${esc(t.mode.name||"")}"></div>
+        <span class="lbl">Бонусы в режиме</span><div class="bonusgrid">${STATS.map(x=>{const mv=Math.round(+((t.mode.bonuses||{})[x.k])||0);return `<div class="field"><label for="mb${i}-${x.k}">${x.n}</label><select class="input" id="mb${i}-${x.k}" data-mb="${i}" data-mbk="${x.k}">${Array.from({length:MODE_MAX+1},(_,v)=>`<option value="${v}"${mv===v?" selected":""}>${v?"+"+v:"0"}</option>`).join("")}</select></div>`}).join("")}</div></div>`:""}</div>`}).join("")}</div>`;
+  if(tab==="cy")left=`<div class="panel"><label style="display:flex;gap:10px;align-items:center;font-weight:700;cursor:pointer"><input type="checkbox" id="cynone" ${d.cy.none?"checked":""} style="width:20px;height:20px"> Мой боец без чарёка (только боевые искусства)</label></div>`+
+    (d.cy.none?"":CY_GROUPS.map(g=>`<div class="panel"><h2>${g.t}</h2><div class="formgrid">${g.f.map(sp=>fieldHTML(sp,d.cy[sp[0]],"y")).join("")}</div></div>`).join(""));
+  if(tab==="stats")left=`<div class="panel"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline"><h2>Стартовые ранги</h2>${startLocked?'<span class="pill ok">зафиксированы ГМом</span>':""}</div>
+     <p class="muted" style="margin:0;font-size:13.5px">На старте у бойца 5 параметров уровня <b>C-</b>, 2 параметра <b>C</b> и 1 параметр <b>C+</b>. Любой параметр можно поставить ниже, если так задумано по персонажу. После одобрения анкеты старт фиксируется.</p>
+     <div class="quota">${[["C+",11,1],["C",10,2],["C-",9,5]].map(([n,L,max])=>`<span class="${q[L]>max?"bad":q[L]===max?"full":""}"><b>${n}</b> ${q[L]}/${max}</span>`).join("")}<span><b>ниже</b> ${q.low}</span></div>
+     ${!validStart(d.start)?`<div class="notice bad" style="font-size:13px">Слишком много высоких рангов. Разрешено максимум: 1 × C+, 2 × C (или ниже), остальные C- или ниже.</div>`:""}
+     <div class="startgrid">${STATS.map(s=>`<div class="field"><label for="st-${s.k}">${s.n}</label><select class="input" id="st-${s.k}" data-start="${s.k}" ${startLocked?"disabled":""}>${Array.from({length:12},(_,i)=>11-i).map(L=>`<option value="${L}"${L===d.start[s.k]?" selected":""}>${label(L)} · ${esc(LADDER[L])}</option>`).join("")}</select></div>`).join("")}</div></div>`;
+  app.innerHTML=`
+  <div class="pagehead"><span class="eyebrow">${cur?"Твои анкеты":"Новый боец"}</span><h1>${cur?esc(cur.name||"Мой боец"):"СОЗДАЙ СВОЕГО БОЙЦА"}</h1>
+   <div style="display:flex;gap:8px;flex-wrap:wrap">${statusPill(a.status,"Персонаж")}${d.cy.none?"":statusPill(a.cyStatus,"Чарёк")}<button class="linkbtn" type="button" id="toreg" style="font-size:13px">Профиль игрока${S.players[S.uid]?": "+esc(S.players[S.uid].discord):""}</button><span class="muted" style="font-size:13px">заработано ${fmt(a.sp)} SP${cur?" · арты добавляются на странице бойца во вкладке «Галерея»":""}</span></div></div>
+  ${!S.canWrite?`<div class="notice warn" style="margin-bottom:18px">Сохранить не получилось: сервер отказал в записи. Выйди и войди в аккаунт заново.</div>`:""}
+  <div class="tabs2">${T("char","1. Анкета персонажа")}${T("cy","2. Анкета чарёка")}${T("stats","3. Старт и прокачка")}</div>
+  <div class="editor">
+   <div style="display:grid;gap:22px;min-width:0">
+    ${tab==="char"?`<div class="panel"><span class="lbl">Аватар</span><div class="avedit">${avatarHTML(d,S.uid)}
+      ${S.assets?`<label class="btn sm" for="avfile">Загрузить картинку</label><input type="file" id="avfile" accept="image/png,image/jpeg,image/webp,image/gif" hidden>${d.avatarId?`<button class="btn sm" type="button" id="avrm">Убрать</button>`:""}`:`<span class="muted" style="font-size:13px">Войди в аккаунт, чтобы загружать картинки.</span>`}
+      <span class="toast" id="avtoast"></span></div></div>`:""}
+    ${left}
+   </div>
+   <div class="sticky" style="display:grid;gap:16px">
+    <div class="panel">
+     <div class="spbox"><span><span class="eyebrow">Свободные SP</span><br><span class="muted" style="font-size:12.5px">потрачено ${fmt(sp)} из ${fmt(a.sp)} (сверх старта)</span></span><b class="${free<0?"over":""}">${fmt(free)}</b></div>
+     ${STATS.map(s=>{const L=d.stats[s.k],nx=L<MAXL?cc[L+1]-cc[L]:0;return `<div class="alloc"><span class="nm">${s.n}<small>старт ${label(d.start[s.k])}${bon[s.k]?` · база ${label(L)} +${bon[s.k]} трейт`:""} · ${L<MAXL?"след. шаг: "+fmt(nx)+" SP":"максимум"}</small>${modeLines(modesOf(d.traits.slice(0,slots)),s.k,eff[s.k])?`<span class="modecol">${modeLines(modesOf(d.traits.slice(0,slots)),s.k,eff[s.k])}</span>`:""}</span>
+       <button class="step" type="button" data-s="${s.k}" data-d="-1" aria-label="Понизить: ${s.n}" ${canDown(s.k)?"":"disabled"}>−</button>
+       <span class="val">${label(eff[s.k])}</span>
+       <button class="step" type="button" data-s="${s.k}" data-d="1" aria-label="Повысить: ${s.n}" ${canUp(s.k)?"":"disabled"}>+</button></div>`}).join("")}
+     <div class="gpline"><span>Энергия GP</span><b>${fmt(gpTotal(eff.gp))}</b><span>Расход GP на техники</span><b>x${ctrlMult(eff.ctrl)}</b><span>Лимит перекоса</span><b>до ${label(Math.min(MAXL,skewLimit(eff)))}</b></div>
+     ${skewIssues(eff).length?`<div class="notice bad" style="font-size:13px">Перекос: ${esc(skewIssues(eff).join(", "))} выше среднего уровня бойца больше чем на 1 тир. Подтяни остальные параметры.</div>`:""}
+
+     ${ci==="degrade"?`<div class="notice warn" style="font-size:13px">Запас GP выше Контроля на 3+ ранга: в бою контроль деградирует до человеческого уровня.</div>`:""}
+     ${rIdx(eff.ctrl)>=gpR+3?`<div class="muted" style="font-size:12.5px">Контроль упёрся в предел: подними Запас GP, чтобы качать его дальше.</div>`:""}
+    </div>
+    <div class="savebar"><button class="btn primary" type="button" id="save" ${S.canWrite?"":"disabled"}>${cur?"Сохранить анкеты":"Создать бойца"}</button>
+     ${cur?`<button class="btn" type="button" id="reset">Отменить</button>`:""}<span class="toast" id="toast" role="status"></span></div>
+   </div></div>`;
+  app.querySelectorAll("[data-c]").forEach(i=>i.oninput=()=>{d[i.dataset.c]=i.value;const c=app.querySelector(`[data-cnt="${i.dataset.c}"]`);if(c){const n=i.value.trim().length,m=MINLEN[i.dataset.c];c.textContent=`${n} / мин. ${m} символов`;c.className="cnt "+(n>=m?"okc":"low")}});
+  app.querySelectorAll("[data-y]").forEach(i=>{const h=()=>{d.cy[i.dataset.y]=i.value};i.oninput=h;i.onchange=()=>{h();if(i.dataset.y==="kind")renderEdit()}});
+  app.querySelectorAll("[data-ti]").forEach(i=>i.oninput=()=>{d.traits[+i.dataset.ti][i.dataset.tf]=i.value});
+  const tlist=tg=>{const [p,k]=tg.split("|");return (p==="c"?d:d.cy)[k+"List"]};
+  app.querySelectorAll("[data-tadd]").forEach(b=>b.onclick=()=>{tlist(b.dataset.tadd).push({name:"",desc:"",bonuses:{}});renderEdit();const n=app.querySelectorAll(`[data-tl^="${b.dataset.tadd}|"][data-tlf="name"]`);if(n.length)n[n.length-1].focus()});
+  app.querySelectorAll("[data-tdel]").forEach(b=>b.onclick=()=>{const tg=b.dataset.tdel;if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Точно?";setTimeout(()=>{if(b.isConnected){b.dataset.armed="";b.textContent="Удалить"}},3000);return}tlist(tg).splice(+tg.split("|")[2],1);renderEdit()});
+  app.querySelectorAll("[data-tl]").forEach(i=>i.oninput=()=>{tlist(i.dataset.tl)[+i.dataset.tl.split("|")[2]][i.dataset.tlf]=i.value});
+  app.querySelectorAll("[data-tlb]").forEach(i=>i.onchange=()=>{const t=tlist(i.dataset.tlb)[+i.dataset.tlb.split("|")[2]];t.bonuses=Object.assign({},t.bonuses||{});t.bonuses[i.dataset.tlk]=+i.value});
+  app.querySelectorAll("[data-mon]").forEach(i=>i.onchange=()=>{const t=d.traits[+i.dataset.mon];t.mode=Object.assign({name:"",bonuses:{}},t.mode||{},{on:i.checked});renderEdit()});
+  app.querySelectorAll("[data-mname]").forEach(i=>i.oninput=()=>{d.traits[+i.dataset.mname].mode.name=i.value});
+  app.querySelectorAll("[data-mb]").forEach(i=>i.onchange=()=>{const m=d.traits[+i.dataset.mb].mode;m.bonuses=Object.assign({},m.bonuses||{});m.bonuses[i.dataset.mbk]=+i.value;renderEdit()});
+  app.querySelectorAll("[data-tb]").forEach(i=>i.onchange=()=>{const t=d.traits[+i.dataset.tb];t.bonuses=traitBon(t);delete t.stat;delete t.bonus;t.bonuses[i.dataset.tbk]=+i.value;renderEdit()});
+  app.querySelectorAll("[data-et]").forEach(b=>b.onclick=()=>{S.editTab=b.dataset.et;renderEdit()});
+  app.querySelectorAll("[data-start]").forEach(sel=>sel.onchange=()=>{const k=sel.dataset.start,old=d.start[k],nv=+sel.value;d.start[k]=nv;d.stats[k]=Math.max(nv,d.stats[k]===old?nv:d.stats[k]);renderEdit()});
+  const cn=document.getElementById("cynone");if(cn)cn.onchange=()=>{d.cy.none=cn.checked;renderEdit()};
+  app.querySelectorAll(".step").forEach(b=>b.onclick=()=>{const k=b.dataset.s;d.stats[k]=Math.min(MAXL,Math.max(d.start[k],d.stats[k]+(+b.dataset.d)));renderEdit()});
+  const rs=document.getElementById("reset");if(rs)rs.onclick=()=>{S.draft=null;renderEdit()};
+  document.getElementById("save").onclick=save;
+  const trg=document.getElementById("toreg");if(trg)trg.onclick=()=>{S.startStep="reg";go("start")};
+  const af=document.getElementById("avfile");if(af)af.onchange=()=>uploadAvatar(af.files[0]);
+  const ar=document.getElementById("avrm");if(ar)ar.onclick=()=>{d.avatarId="";renderEdit()};
+}
+async function shrink(file,max){
+  const url=URL.createObjectURL(file);
+  try{const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=url});
+    const k=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
+    c.getContext("2d").drawImage(img,0,0,c.width,c.height);return await new Promise(r=>c.toBlob(r,"image/jpeg",.88))}
+  finally{URL.revokeObjectURL(url)}
+}
+function upErr(e){const c=e&&e.code;return c==="too_large"?"файл слишком большой (максимум 20 МБ)":c==="unsupported_type"?"формат не поддерживается (нужны PNG, JPG, WebP, GIF, SVG, MP4 или WebM)":c==="quota_or_state"?"хранилище заполнено":c==="rate_limited"?"слишком часто, подожди минуту":"не удалось загрузить"}
+async function uploadAvatar(file){
+  const t=document.getElementById("avtoast");if(!file)return;t.className="toast";t.textContent="Загружаю…";
+  try{const gif=file.type==="image/gif";const blob=gif?file:await shrink(file,640);const r=await S.assets.upload(blob,{type:gif?"image/gif":"image/jpeg"});S.draft.avatarId=r.id;renderEdit();
+    const t2=document.getElementById("avtoast");t2.className="toast ok";t2.textContent="Готово. Не забудь сохранить анкету."}
+  catch(e){t.className="toast err";t.textContent=upErr(e)}
+}
+async function save(){
+  const d=S.draft,t=document.getElementById("toast"),a=award(S.uid),cur=S.fighters[S.uid];
+  const fail=m=>{t.className="toast err";t.textContent=m};
+  if(!String(d.discord||"").trim())return fail("Укажи ник в Discord во вкладке «Анкета персонажа».");
+  if(!String(d.name||"").trim())return fail("Укажи имя бойца во вкладке «Анкета персонажа».");
+  for(const k in MINLEN){const n=String(d[k]||"").trim().length;if(n<MINLEN[k])return fail(`${k==="bio"?"Биография":"Характер"}: нужно минимум ${MINLEN[k]} символов, сейчас ${n}.`)}
+  if(!validStart(d.start))return fail("Стартовые ранги нарушают правило 5×C-, 2×C, 1×C+.");
+  if(a.status==="approved"&&cur&&!S.owner&&STATS.some(s=>startOf(cur)[s.k]!==d.start[s.k]))return fail("Старт зафиксирован после одобрения.");
+  if(spentSP(d.stats,d.start)>(a.sp||0))return fail("Потрачено больше SP, чем есть.");
+  const trs=d.traits.slice(0,traitSlots(S.uid)),eff=effFrom(statsOf(d),trs);
+  if(rIdx(eff.ctrl)>rIdx(eff.gp)+3)return fail("Контроль не может обгонять Запас GP больше чем на 3 ранга.");
+  if(skewIssues(eff).length)return fail("Перекос параметров: "+skewIssues(eff).join(", ")+" выше среднего больше чем на 1 тир.");
+  const cleanList=(obj,k)=>listOf(obj,k).map(x=>({name:String(x.name||"").trim().slice(0,80),desc:String(x.desc||"").trim().slice(0,2000),bonuses:techBon(x)})).filter(x=>x.name||x.desc).slice(0,TECH_COUNT);
+  const asText=L=>L.map(x=>x.desc?x.name+" — "+x.desc:x.name).join("\n");
+  const body={};ALL_CHAR.forEach(([k,,type,mx])=>{if(type==="list"){body[k+"List"]=cleanList(d,k);body[k]=asText(body[k+"List"]).slice(0,mx)}else body[k]=String(d[k]||"").slice(0,mx)});
+  body.cy={none:!!d.cy.none};ALL_CY.forEach(([k,,type,mx])=>{if(type==="list"){body.cy[k+"List"]=cleanList(d.cy,k);body.cy[k]=asText(body.cy[k+"List"]).slice(0,mx)}else body.cy[k]=String(d.cy[k]||"").slice(0,type==="sel"?60:mx)});
+  body.start=startOf(d);body.stats=statsOf(d);STATS.forEach(s=>{if(body.stats[s.k]<body.start[s.k])body.stats[s.k]=body.start[s.k]});
+  body.traits=d.traits.slice(0,traitSlots(S.uid)).map(x=>({name:String(x.name||"").trim().slice(0,60),desc:String(x.desc||"").trim().slice(0,1500),bonuses:traitBon(x),mode:modeOf(x)?{on:true,name:modeOf(x).name.slice(0,60),bonuses:modeOf(x).bonuses}:{on:false}})).filter(x=>x.name||x.desc);
+  body.avatarId=validId(d.avatarId)?d.avatarId:"";body.gallery=galleryOf(cur,"gallery");body.cyGallery=galleryOf(cur,"cyGallery");body.updatedAt=new Date().toISOString();
+  const btn=document.getElementById("save");btn.disabled=true;t.className="toast";t.textContent="Сохраняю…";
+  try{await S.db.doc("fighters/"+S.uid).set(body);
+    const r=rev(S.uid);if(r.status==="rework"||r.cyStatus==="rework"){const nb={status:r.status==="rework"?"pending":r.status,cyStatus:r.cyStatus==="rework"?"pending":r.cyStatus,history:r.history||[]};try{await S.db.doc("reviews/"+S.uid).set(nb);S.reviews[S.uid]=nb;await S.db.collection("chats/"+S.uid+"/msgs").add({by:S.uid,role:"system",text:"Игрок внёс правки, анкета снова на проверке.",t:new Date().toISOString()})}catch(e){}}
+    S.draft=null;S.viewTab="char";go("view",S.uid)}
+  catch(e){btn.disabled=false;
+    if(e&&e.code==="invalid_argument"){S.canWrite=false;fail("Сервер отказал в записи. Выйди и войди в аккаунт заново.")}
+    else if(e&&e.code==="quota_exceeded")fail("База заполнена. Сообщи владельцу сайта.");
+    else fail("Не удалось сохранить. Попробуй ещё раз через минуту.")}
+}
+
+/* ===== Разница сил ===== */
+const DIFFS=[
+ {min:0,n:"Равенство",c:"#127A3E",d:"Бойцы на одном уровне. Удары наносят умеренный урон, защита пробивается, но не критично. Бой решают скилл, тактика и контроль GP.",ex:"Джин Мори vs Хан Дэви (финал Сеульского отбора)"},
+ {min:3,n:"Незначительная разница",c:"#1F3F8F",d:"Один боец слегка превосходит другого. Его Чарёк или навыки чуть сильнее и стабильнее. Победа достигается опытом или лучшим контролем GP.",ex:"Ю Мира vs Пэк Сынчхоль (Сеульский турнир)"},
+ {min:8,n:"Средняя разница",c:"#9A5A00",d:"Значительное превосходство. Защита слабого пробивается после нескольких попаданий, ему приходится уклоняться, хитрить или действовать командой. Разница в GP становится критичной.",ex:"Судьи (Судья Q) vs обычные участники"},
+ {min:12,n:"Подавляющая разница",c:"#C8001A",d:"Почти односторонний бой. Атаки слабого практически не наносят вреда, одна мощная способность Чарёк может решить исход.",ex:"Сан Мандок (Епископ NOX) vs участники Национального турнира"},
+ {min:16,n:"Непреодолимая разница",c:"#3A0610",d:"Абсолютное превосходство. Слабый не может пробить защиту или заблокировать удар, любая базовая атака сильного — ваншот. Возможно божественное давление GP.",ex:"Нефритовый Император или Высшие Боги vs обычные пользователи Чарёк"}];
+function renderCompare(){
+  const ids=Object.keys(S.fighters).sort((x,y)=>(S.fighters[x].name||"").localeCompare(S.fighters[y].name||"","ru"));
+  if(ids.length<2){app.innerHTML=`<div class="pagehead"><span class="eyebrow">Калькулятор</span><h1>РАЗНИЦА СИЛ</h1></div>
+   <div class="duel"><div class="side a">${slot("duelA",0,5,"")}<span class="n">Боец A</span></div><div class="side b">${slot("duelB",1,6,"")}<span class="n">Боец B</span></div></div>
+   <div class="empty"><h2>Нужно минимум два бойца</h2><p class="muted" style="margin:0">Когда в реестре появятся анкеты, здесь можно будет сравнить любых двух бойцов и узнать категорию боя и награды.</p></div>`;return}
+  if(!S.cmpA||!S.fighters[S.cmpA])S.cmpA=ids[0];if(!S.cmpB||!S.fighters[S.cmpB]||S.cmpB===S.cmpA)S.cmpB=ids.find(i=>i!==S.cmpA);
+  const fA=S.fighters[S.cmpA],fB=S.fighters[S.cmpB],A=effOf(fA),B=effOf(fB);
+  const diff=Math.abs(power(A)-power(B)),cat=[...DIFFS].reverse().find(x=>diff>=x.min);
+  const close=STATS.filter(s=>Math.abs(A[s.k]-B[s.k])<=1).length,equal=close>=3;
+  const nA=esc(fA.name||"Боец A"),nB=esc(fB.name||"Боец B");
+  const weak=power(A)<power(B)?nA:power(B)<power(A)?nB:null;
+  const opt=sel=>ids.map(i=>`<option value="${esc(i)}"${i===sel?" selected":""}>${esc(S.fighters[i].name||"Без имени")}</option>`).join("");
+  const side=(f,id,cls,n)=>{const c=coverOf(f);return `<div class="side ${cls}">${c&&c.kind!=="video"?`<img src="${imgSrc(c.id)}" alt="">`:speedArt(hash(id),"")}<span class="n">${n} · ${label(Math.round(power(effOf(f))))}</span></div>`};
+  app.innerHTML=`<div class="pagehead"><span class="eyebrow">Калькулятор</span><h1>РАЗНИЦА СИЛ</h1><span class="muted">Разница считается по среднему уровню восьми параметров. Один уровень — это шаг вида C- → C → C+.</span></div>
+  <div class="cmp" style="margin-bottom:18px"><div class="field"><label for="ca">Боец A</label><select class="input" id="ca">${opt(S.cmpA)}</select></div><span class="vs">VS</span><div class="field"><label for="cb">Боец B</label><select class="input" id="cb">${opt(S.cmpB)}</select></div></div>
+  <div class="duel">${side(fA,S.cmpA,"a",nA)}${side(fB,S.cmpB,"b",nB)}</div>
+  <div class="verdict" style="background:${cat.c};margin-bottom:22px"><span class="eyebrow" style="color:#fff;opacity:.85">≈ ${diff.toFixed(1)} ур. разницы</span><h2>${cat.n.toUpperCase()}</h2><p>${cat.d}</p><p style="font-size:13px">Пример: ${cat.ex}</p></div>
+  <div class="tablewrap" style="margin-bottom:22px"><table class="t"><thead><tr><th>Параметр</th><th>${nA}</th><th>${nB}</th><th style="text-align:right">Разрыв</th></tr></thead><tbody>
+   ${STATS.map(s=>{const g=A[s.k]-B[s.k];return `<tr><td>${s.n}</td><td><b class="rk">${label(A[s.k])}</b></td><td><b class="rk">${label(B[s.k])}</b></td><td class="num" style="color:${Math.abs(g)<=1?"var(--ok)":"var(--muted)"}">${g>0?"+":""}${g}</td></tr>`}).join("")}
+   <tr><td><b>Общая сила</b></td><td><b class="rk">${label(Math.round(power(A)))}</b></td><td><b class="rk">${label(Math.round(power(B)))}</b></td><td class="num">${(power(A)-power(B)).toFixed(1)}</td></tr>
+  </tbody></table></div>
+  <div class="panel"><h2>${equal?"Равный бой":"Неравный бой"}</h2>
+   <p class="muted" style="margin:0;font-size:14px">${close} ${plural(close,"параметр","параметра","параметров")} в пределах ±1 уровня. ${equal?"Это равный бой: минимум 3 параметра совпадают.":"Меньше трёх совпадающих параметров, значит бой неравный."}</p>
+   ${equal?`<ul style="margin:0;padding-left:20px"><li>Победитель: 140 SP</li><li>Проигравший: 70 SP</li></ul>`
+   :`<ul style="margin:0;padding-left:20px"><li>Слабый${weak?` (${weak})`:""} победил: 300 SP</li><li>Сильный победил: 70 SP</li><li>Слабый проиграл: 100 SP</li><li>Сильный проиграл: 60 SP</li></ul>`}</div>`;
+  document.getElementById("ca").onchange=e=>{S.cmpA=e.target.value;renderCompare()};
+  document.getElementById("cb").onchange=e=>{S.cmpB=e.target.value;renderCompare()};
+}
+
+/* ===== Панель ГМа ===== */
+function weeklyDaily(a){const wk=Date.now()-7*864e5;return (a.log||[]).filter(x=>x.cat==="daily"&&Date.parse(x.t)>wk).reduce((s,x)=>s+(+x.sp||0),0)}
+function renderGM(){
+  if(!S.owner){go("list");return}
+  const ids=Object.keys(S.fighters).sort((x,y)=>(S.fighters[x].name||"").localeCompare(S.fighters[y].name||"","ru"));
+  const c=costs(),pl=pool();
+  const presetOpts=PRESETS.map(g=>`<optgroup label="${esc(g.g)}">${g.items.map(it=>`<option value="${ALLP.indexOf(it)}">${esc(it[0])}${it[1]?" · "+it[1]+" SP":""}</option>`).join("")}</optgroup>`).join("");
+  app.innerHTML=`<div class="pagehead"><span class="eyebrow">Только для владельца</span><h1>ПАНЕЛЬ ГМА</h1>
+   <span class="muted">Арты сайта, анкеты, начисление SP по шаблонам и стоимость прокачки.</span></div>
+  ${reviewersPanel()}
+  <div class="panel" style="margin-bottom:28px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline"><h2>Арты сайта · ${pl.length}/${POOL_MAX}</h2><span class="muted" style="font-size:13px">порядок = где появятся</span></div>
+   <p class="muted" style="margin:0;font-size:13.5px">Эти арты разлетаются по всему сайту: №1–5 в коллаж на главной, дальше по кругу в обложки тиров шкалы силы, боковые панели правил и пустые карточки. Залей сюда любые арты, которые хочешь видеть в оформлении.</p>
+   ${S.assets?`<label class="drop" id="pdrop" for="pfile"><span class="big">+ АРТЫ САЙТА</span><span>Перетащи файлы или нажми, чтобы выбрать.</span><span class="progress" id="pprog"></span></label><input type="file" id="pfile" accept="image/png,image/jpeg,image/gif,image/webp,video/mp4,video/webm" multiple hidden>`:""}
+   ${pl.length?`<div class="pool">${pl.map((p,i)=>`<div class="pi">${media(p)}<span class="n">${i+1}${i<5?" · главная":""}</span><span class="pbtns"><button type="button" data-prep="${i}" title="Заменить картинку">↻</button>${i?`<button type="button" data-pup="${i}" title="Переместить раньше">←</button>`:""}<button type="button" data-prm="${i}" title="Удалить">✕</button></span></div>`).join("")}</div>`:""}
+  </div>
+  ${ids.length?`<div class="gmlist">${ids.map(id=>{const f=S.fighters[id],a=award(id),st=effOf(f),sp=spentSP(statsOf(f),startOf(f)),free=(a.sp||0)-sp,wd=weeklyDaily(a),tr=(f.traits||[]).length;
+   return `<div class="gmrow" data-row="${esc(id)}">
+    <div class="top">${avatarHTML(f,id)}<div class="who"><button class="linkbtn" type="button" data-open="${esc(id)}" style="font:17px var(--display);text-decoration:none">${esc(f.name||"Без имени")}</button><br>
+      <span class="muted" style="font-size:12.5px">Discord: ${esc(f.discord||playerName(id))} · сила ${label(Math.round(power(st)))} · SP ${fmt(free)} своб. / ${fmt(a.sp)} всего · повседневность за неделю ${wd}/${DAILY_CAP} · артов ${galleryOf(f).length+galleryOf(f,"cyGallery").length}</span></div>
+      ${free<0?'<span class="pill bad">SP в минусе</span>':""}${ctrlIssue(st)==="over"?'<span class="pill bad">контроль сверх лимита</span>':""}${skewIssues(st).length?'<span class="pill bad">перекос параметров</span>':""}${tr>traitSlots(id)?'<span class="pill bad">лишние трейты</span>':""}
+      ${!validStart(startOf(f))?'<span class="pill bad">старт не по правилам</span>':""}${statusPill(a.status,"Персонаж")}${cyOf(f).none?"":statusPill(a.cyStatus,"Чарёк")}</div>
+    <div class="awardline"><div class="field"><label>Начислить SP за</label><select class="input" data-p>${presetOpts}</select></div>
+      <div class="field"><label>SP</label><input class="input" type="number" data-amt value="25" step="5"></div>
+      <div class="field"><label>Комментарий</label><input class="input" data-cm maxlength="120" placeholder="ссылка на пост, с кем бой"></div>
+      <button class="btn primary" type="button" data-give>Начислить</button></div>
+    <div class="gmgrid">
+      
+      <div class="field"><label>Доп. слоты трейтов</label><input class="input" type="number" min="0" max="10" data-f="extraTraits" value="${+a.extraTraits||0}"></div>
+      <div class="field"><label>Победы</label><input class="input" type="number" min="0" data-f="wins" value="${a.wins||0}"></div>
+      <div class="field"><label>Поражения</label><input class="input" type="number" min="0" data-f="losses" value="${a.losses||0}"></div>
+    </div>
+    <div class="field"><label>Заметка ГМа (видна в профиле)</label><textarea class="input" data-f="note" style="min-height:44px" maxlength="2000">${esc(a.note||"")}</textarea></div>
+    <div class="savebar"><button class="btn" type="button" data-save>Сохранить карточку</button><button class="btn" type="button" data-chk="${esc(id)}">Проверка и чат</button><button class="btn danger" type="button" data-del>Удалить бойца</button><span class="toast" data-t></span></div>
+    ${(a.log||[]).length?`<details><summary>История начислений (${a.log.length})</summary><div class="log">${a.log.slice().reverse().map(x=>`<div><span class="plus">${x.sp>0?"+":""}${x.sp}</span><span>${esc(new Date(x.t).toLocaleDateString("ru-RU"))} · ${esc(x.label)}${x.note?" — "+esc(x.note):""}</span></div>`).join("")}</div></details>`:""}
+   </div>`}).join("")}</div>`
+  :`<div class="empty"><h2>Пока нет анкет</h2><p class="muted" style="margin:0">Когда игроки создадут бойцов, они появятся здесь.</p></div>`}
+  <div class="panel" style="margin-top:28px"><h2>Стоимость прокачки</h2>
+   <p class="muted" style="margin:0;font-size:13.5px">Сколько SP стоит поднять любой параметр на один шаг (например, C → C+) внутри каждого тира.</p>
+   <div class="costs">${c.map((v,i)=>`<div class="field"><label for="cost${i}">L-${15-i}: ${RANKS[i*3]}–${RANKS[i*3+2]}</label><input class="input" type="number" min="0" id="cost${i}" data-cost="${i}" value="${v}"></div>`).join("")}</div>
+   <div class="savebar"><button class="btn" type="button" id="savecosts">Сохранить стоимость</button><button class="btn" type="button" id="defcosts">Вернуть стандартную</button><span class="toast" id="ctoast"></span></div></div>`;
+  wirePool();wireReviewers();
+  app.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>go("view",b.dataset.open));
+  app.querySelectorAll("[data-chk]").forEach(b=>b.onclick=()=>{S.viewTab="check";go("view",b.dataset.chk)});
+  app.querySelectorAll(".gmrow").forEach(row=>{
+    const id=row.dataset.row,t=row.querySelector("[data-t]"),ps=row.querySelector("[data-p]"),amt=row.querySelector("[data-amt]");
+    ps.onchange=()=>{const p=ALLP[+ps.value];if(p[1])amt.value=p[1]};
+    row.querySelector("[data-give]").onclick=async()=>{
+      const p=ALLP[+ps.value],v=Math.round(+amt.value||0),a=award(id);if(!v){t.className="toast err";t.textContent="Укажи количество SP.";return}
+      if(p[2]==="daily"&&weeklyDaily(a)+v>DAILY_CAP){t.className="toast err";t.textContent=`Лимит повседневности: осталось ${Math.max(0,DAILY_CAP-weeklyDaily(a))} SP на эту неделю.`;return}
+      const log=(a.log||[]).concat({t:new Date().toISOString(),sp:v,label:p[0],cat:p[2],note:row.querySelector("[data-cm]").value.slice(0,120)}).slice(-200);
+      const body=Object.assign({},a,{sp:(a.sp||0)+v,log});if(p[3]==="w")body.wins=(a.wins||0)+1;if(p[3]==="l")body.losses=(a.losses||0)+1;
+      await writeAward(id,body,t,`+${v} SP начислено`)};
+    row.querySelector("[data-save]").onclick=()=>{const g=n=>row.querySelector(`[data-f="${n}"]`).value,a=award(id);
+      writeAward(id,Object.assign({},a,{extraTraits:Math.min(10,Math.max(0,Math.round(+g("extraTraits")||0))),wins:Math.max(0,Math.round(+g("wins")||0)),losses:Math.max(0,Math.round(+g("losses")||0)),note:g("note").slice(0,2000)}),t,"Сохранено")};
+    const del=row.querySelector("[data-del]");
+    del.onclick=async()=>{
+      if(del.dataset.armed!=="1"){del.dataset.armed="1";del.textContent="Точно удалить? Нажми ещё раз";setTimeout(()=>{if(del.isConnected){del.dataset.armed="";del.textContent="Удалить бойца"}},4000);return}
+      try{await S.db.doc("fighters/"+id).delete();await S.db.doc("awards/"+id).delete();delete S.fighters[id];delete S.awards[id];renderGM()}catch(e){t.className="toast err";t.textContent="Не удалось удалить"}};
+  });
+  const ct=document.getElementById("ctoast");
+  document.getElementById("savecosts").onclick=async()=>{const arr=[...app.querySelectorAll("[data-cost]")].map(i=>Math.max(0,Math.round(+i.value||0)));
+    try{await S.db.doc("config/main").set(Object.assign({},S.config,{costs:arr}));S.config.costs=arr;ct.className="toast ok";ct.textContent="Стоимость сохранена"}catch(e){ct.className="toast err";ct.textContent="Ошибка записи"}};
+  document.getElementById("defcosts").onclick=()=>{app.querySelectorAll("[data-cost]").forEach((i,n)=>i.value=DEFAULT_COSTS[n])};
+}
+async function savePool(arr){S.config=Object.assign({},S.config,{art:arr});await S.db.doc("config/main").set(S.config)}
+function wirePool(){
+  const fi=document.getElementById("pfile"),dz=document.getElementById("pdrop"),prog=()=>document.getElementById("pprog");
+  const add=async files=>{if(!files.length||S.busy)return;let arr=pool();files=files.slice(0,POOL_MAX-arr.length);if(!files.length){prog().textContent=`Максимум ${POOL_MAX} артов.`;return}
+    S.busy=true;let done=0,fails=[];
+    for(const file of files){prog().textContent=`Загружаю ${done+1} из ${files.length}…`;
+      try{const {blob,type}=await prepFile(file);const r=await S.assets.upload(blob,{type});arr=arr.concat({id:r.id,kind:kindOf({type})});done++}catch(e){fails.push(file.name+": "+upErr(e))}}
+    S.busy=false;try{if(done)await savePool(arr);renderGM();const p=prog();if(p&&fails.length){p.style.color="var(--red)";p.textContent="Не загрузились: "+fails.join("; ")}}catch(e){const p=prog();if(p){p.style.color="var(--red)";p.textContent="Не удалось сохранить список артов."}}};
+  if(fi)fi.onchange=()=>add([...fi.files]);
+  if(dz){["dragenter","dragover"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add("over")}));
+    ["dragleave","drop"].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove("over")}));
+    dz.addEventListener("drop",e=>add([...(e.dataTransfer?.files||[])]))}
+  app.querySelectorAll("[data-prep]").forEach(b=>b.onclick=()=>pickFile(async file=>{const i=+b.dataset.prep,arr=pool(),old=arr[i];const {blob,type}=await prepFile(file);const r=await S.assets.upload(blob,{type});arr[i]={id:r.id,kind:kindOf({type})};await savePool(arr);try{await S.assets.delete(old.id)}catch(e){}renderGM()}));
+  app.querySelectorAll("[data-pup]").forEach(b=>b.onclick=async()=>{const i=+b.dataset.pup,arr=pool();[arr[i-1],arr[i]]=[arr[i],arr[i-1]];try{await savePool(arr)}catch(e){}renderGM()});
+  app.querySelectorAll("[data-prm]").forEach(b=>b.onclick=async()=>{const i=+b.dataset.prm;
+    if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="удалить?";setTimeout(()=>{if(b.isConnected){b.dataset.armed="";b.textContent="✕"}},3500);return}
+    const arr=pool(),[it]=arr.splice(i,1);try{await savePool(arr);await S.assets.delete(it.id)}catch(e){}renderGM()});
+}
+async function writeAward(id,body,t,ok){
+  body=Object.assign({},body);delete body.status;delete body.cyStatus;
+  t.className="toast";t.textContent="…";
+  try{await S.db.doc("awards/"+id).set(body);S.awards[id]=body;renderGM();
+    const nt=app.querySelector(`.gmrow[data-row="${CSS.escape(id)}"] [data-t]`);if(nt){nt.className="toast ok";nt.textContent=ok}}
+  catch(e){t.className="toast err";t.textContent="Ошибка записи"}
+}
+
+/* ===== Система ===== */
+function renderRules(){
+  const c=costs(),tab=S.sysTab,pl=pool();
+  const T=(k,n)=>`<button type="button" data-st="${k}" aria-pressed="${tab===k}">${n}</button>`;
+  let body="";
+  if(tab==="stats")body=`<div class="rules">
+   <p>Восемь параметров определяют физические способности, боевые искусства и силу Чарёк бойца. Каждый параметр измеряется рангом от <b>F-</b> до <b>XZ+</b>: 45 рангов по три ступени (−, обычный, +), сгруппированных в 15 тиров от L-15 до L-1.</p>
+   <div class="tablewrap"><table class="t"><thead><tr><th>Параметр</th><th>Что включает</th></tr></thead><tbody>
+    <tr><td><b>Сила</b></td><td>Сила удара, разрушение объектов, метание, прыжки, оружие, физическое давление.</td></tr>
+    <tr><td><b>Скорость</b></td><td>Скорость атак, передвижения, уклонения, рефлексы, мобильность, ускорение через GP.</td></tr>
+    <tr><td><b>Стойкость</b></td><td>Прочность тела, сопротивление урону и способностям Чарёк, ментальная устойчивость, сопротивление боли.</td></tr>
+    <tr><td><b>Выносливость</b></td><td>Запас сил, переносимость усталости, восстановление в бою, боевой дух.</td></tr>
+    <tr><td><b>Техника БИ</b></td><td>Чистота стиля, секретные приёмы, контратаки, блоки, обманные манёвры.</td></tr>
+    <tr><td><b>Контроль Чарёка</b></td><td>Точность призыва, эффективность и стабильность техник, снижение затрат GP.</td></tr>
+    <tr><td><b>Запас GP</b></td><td>Объём GP, длительность поддержания Чарёк, мощные и масштабные техники.</td></tr>
+    <tr><td><b>Восприятие</b></td><td>Сенсорика Чарёк, чтение движений, предсказание ударов, поиск ловушек и слабых мест.</td></tr>
+   </tbody></table></div>
+   <h2>Старт</h2><p>При создании бойца игрок распределяет стартовые ранги: <b>5 параметров C-</b>, <b>2 параметра C</b> и <b>1 параметр C+</b>. Любой параметр можно взять ниже, если так задумано по персонажу. После одобрения анкеты ГМом старт фиксируется, а SP тратятся только на ступени выше старта.</p>
+   <ul><li>C- — Кан Мансок (финал против Ю Миры)</li><li>C — Пэк Сынчхоль (с бейсбольной битой против Мори)</li><li>C+ — Ю Мира (стиль Безумного Меча)</li></ul>
+   <h2>Две анкеты</h2><p>У каждого бойца две анкеты: анкета персонажа (личность, история, сильные и слабые стороны) и анкета чарёка (контракт, способности, ограничения). ГМ проверяет их отдельно.</p>
+   <h2>Трейты</h2><p>Трейт — особенность персонажа. У каждого бойца 2 слота трейтов, ГМ может выдать дополнительные слоты за сюжет или достижения. Трейт может давать постоянные бонусы к любым параметрам, а также <b>режим</b> — временное усиление, которое действует, только пока персонаж в него вошёл. В профиле рядом с параметрами показано, каким станет ранг в режиме. Бонусы и режимы проверяет анкетолог.</p>
+
+   <h2>Лимит перекоса</h2><p>Ни один параметр (с учётом трейтов) не может быть выше среднего уровня бойца больше чем на один тир (9 ступеней). Чтобы качать один параметр дальше, подтяни остальные.</p>
+   <h2>Стоимость шага</h2><p>Поднять параметр на одну ступень стоит столько SP, сколько указано для тира, в который он переходит:</p>
+   <div class="tablewrap"><table class="t"><thead><tr><th>Тир</th><th>Ранги</th><th style="text-align:right">SP за шаг</th></tr></thead><tbody>${c.map((v,i)=>`<tr><td>L-${15-i}</td><td>${RANKS[i*3]} → ${RANKS[i*3+1]} → ${RANKS[i*3+2]}</td><td class="num">${fmt(v)}</td></tr>`).join("")}</tbody></table></div></div>`;
+  if(tab==="gp")body=`<div class="rules">
+   <p>Запас GP — это энергия Чарёк. За каждый достигнутый ранг параметра «Запас GP» боец получает прибавку энергии. На сайте энергия считается автоматически.</p>
+   <div class="tablewrap"><table class="t"><thead><tr><th>Ранг</th><th style="text-align:right">+ энергии</th><th style="text-align:right">Итого</th><th style="text-align:right">Расход при таком Контроле</th></tr></thead><tbody>
+   ${RANKS.map((r,i)=>`<tr><td><b class="rk">${r}</b></td><td class="num">+${fmt(GPB[i])}</td><td class="num">${fmt(gpTotal(i*3+1))}</td><td class="num">x${CM[i]}${r==="F"?" (человек)":""}</td></tr>`).join("")}
+   <tr><td><b class="rk">XZ+</b></td><td class="num">+${fmt(5000000)}</td><td class="num">${fmt(gpTotal(MAXL))}</td><td class="num">x0.001</td></tr>
+   </tbody></table></div>
+   <p>Особый случай: на ступени SS+ множитель контроля x0.75.</p>
+   <h2>Контроль Чарёка</h2>
+   <ul><li>Контроль желательно держать на уровне Запаса GP или выше.</li>
+   <li>Разница между двумя параметрами не должна превышать три ранга.</li>
+   <li>Если Запас GP выше Контроля на 3 ранга и больше (например, C и F), то при использовании способностей Чарёк контроль деградирует до человеческого уровня.</li>
+   <li>Если Контроль выше Запаса на 3 ранга (например, C и F), это предел: дальше Контроль не качается, пока не поднимешь Запас GP. Сайт сам блокирует такую прокачку.</li>
+   <li>У каждой расы и типа контракта есть свой предел развития, а также свои баффы и дебаффы. Это решает ГМ.</li></ul></div>`;
+  if(tab==="sp")body=`<div class="rules">
+   <p>SP начисляет ГМ в панели ГМа. Все суммы ниже уже есть там в виде шаблонов.</p>
+   <h2>Повседневность</h2><ul><li>Содержательный диалог с игроком: +25 SP</li><li>Отдых, посиделки, тренировки в додзё, прогулки: +55 SP</li><li>Лор и путь бойца, раскрытие прошлого: +65 SP за арку</li><li><b>Лимит: 500 SP в неделю</b>. РП в личных сообщениях не засчитывается.</li></ul>
+   <h2>Ивенты</h2><ul><li>Мини-ивент: от 75 до 150 SP</li><li>Глобальный ивент: 175 SP за участие, 300 SP за значительный вклад</li></ul>
+   <h2>Спарринг</h2><ul><li>Победитель: 180 SP, проигравший: 90 SP</li><li>Правила боя обговариваются заранее.</li></ul>
+   <h2>Тренировки</h2><ul><li>Лёгкая (короткий пост): 65 SP, раз в день, затем 3 часа отдыха, нельзя после тяжёлой</li><li>Тяжёлая (1–2 поста по ~1000 символов): 175 SP, до 3 раз в неделю, 6 часов без боя в полную силу</li><li>Хардкорная (3–4 поста по ~1500 символов): 215 SP, раз в неделю, 48 часов на 60% силы</li></ul>
+   <h2>Битвы</h2><ul><li>Равный бой (3+ параметра равны или ±1): победа 140, поражение 70</li><li>Неравный бой: слабый победил 300, сильный победил 70, слабый проиграл 100, сильный проиграл 60</li>
+   <li>Один против группы: победа над слабыми 140, над сильной группой 400, поражение 100</li><li>Группа победила: сильного 50 каждому, слабого 150 каждому</li>
+   <li>Группа 3–4 бойцов победила Судью / члена Шестёрки: +270 каждому</li><li>Группа 2–3 бойцов победила Епископа NOX / Высшего небожителя: +350 каждому</li><li>Участие в Рагнарёке: +450 каждому (доступ не у всех)</li><li>В тяжёлых боях с НПС возможна гибель персонажа.</li></ul></div>`;
+  if(tab==="ladder")body=`<div class="ladder">${TIERS.map((n,g)=>{return `<div class="tierblk"><div class="tart">${slot("tier"+g,g+5,g*5+3,"")}<span class="code">L-${15-g}</span></div>
+   <div class="tb"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:baseline"><b>${esc(n)}</b><span class="muted" style="font-size:12.5px">${RANKS[g*3]} → ${RANKS[g*3+1]} → ${RANKS[g*3+2]}</span></div>
+   <ol>${[0,1,2,3,4,5,6,7,8].map(j=>{const L=g*9+j;return `<li><span>${label(L)}</span><span>${esc(LADDER[L])}</span></li>`}).join("")}</ol></div></div>`}).join("")}</div>`;
+  if(tab==="cytypes")body=`<div class="rules"><p>Существует множество способов проявления и использования Чарёка. Все они делятся на категории:</p><div class="cytypes">${CY_TYPES.map(([n,dsc])=>`<div class="ct"><b>${esc(n)}</b><p>${esc(dsc)}</p></div>`).join("")}</div></div>`;
+  if(tab==="diff")body=`<div class="ladder">${DIFFS.map(x=>`<div class="verdict" style="background:${x.c}"><span class="eyebrow" style="color:#fff;opacity:.85">${x.min?"~"+x.min+" уровней":"на одном уровне"}</span><h2>${x.n.toUpperCase()}</h2><p>${x.d}</p><p style="font-size:13px">Пример: ${x.ex}</p></div>`).join("")}</div>`;
+  const side=tab==="ladder"?"":`<aside class="artcol">${[0,1].map(i=>{return `<div class="ac">${slot("side"+i,i+3,i*7+2,i?"ХВАК!":"БАМ!")}</div>`}).join("")}</aside>`;
+  app.innerHTML=`<div class="pagehead"><span class="eyebrow">Правила сервера</span><h1>СИСТЕМА ПРОКАЧКИ</h1></div>
+   <div class="tabs2">${T("stats","Параметры")}${T("gp","GP и контроль")}${T("sp","Как получить SP")}${T("ladder","Шкала силы")}${T("diff","Разница сил")}${T("cytypes","Типы чарёка")}</div>
+   ${side?`<div class="rulesgrid"><div style="min-width:0">${body}</div>${side}</div>`:body}`;
+  app.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{S.sysTab=b.dataset.st;renderRules()});
+}
+
+/* ===== Арт-слоты: владелец меняет картинки прямо на страницах ===== */
+function slotArt(key,fb){const sl=S.config.slots&&S.config.slots[key];if(sl&&validId(sl.id))return sl;const p=pool();return p.length?p[fb%p.length]:null}
+function slot(key,fb,seed,word){const a=slotArt(key,fb),own=!!(S.config.slots&&S.config.slots[key]&&validId(S.config.slots[key].id));
+  return artOr(a,seed,word)+(S.artEdit&&S.owner&&S.assets?`<span class="slotbox"><button type="button" class="btn sm primary" data-slot="${key}">✎ ${a?"Заменить":"Добавить"}</button>${own?`<button type="button" class="btn sm" data-slotreset="${key}">Сбросить</button>`:""}</span>`:"")}
+function pickFile(cb){const inp=document.createElement("input");inp.type="file";inp.accept="image/png,image/jpeg,image/gif,image/webp,video/mp4,video/webm";
+  inp.onchange=async()=>{const f=inp.files[0];if(!f)return;slotToast("Загружаю…");try{await cb(f);slotToast("Готово","ok")}catch(e){slotToast(e&&e.code?upErr(e):"Не удалось сохранить","err")}};inp.click()}
+let slotT;function slotToast(m,c){let el=document.getElementById("slottoast");if(!el){el=document.createElement("div");el.id="slottoast";document.body.appendChild(el)}el.textContent=m;el.className=c||"";el.hidden=false;clearTimeout(slotT);if(c)slotT=setTimeout(()=>el.hidden=true,2500)}
+async function setSlot(key,val){const slots=Object.assign({},S.config.slots||{});if(val)slots[key]=val;else delete slots[key];S.config=Object.assign({},S.config,{slots});await S.db.doc("config/main").set(S.config)}
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-slot]"),r=e.target.closest("[data-slotreset]");
+  if(b&&S.owner){e.preventDefault();e.stopPropagation();const key=b.dataset.slot,old=S.config.slots&&S.config.slots[key];
+    pickFile(async file=>{const {blob,type}=await prepFile(file);const res=await S.assets.upload(blob,{type});await setSlot(key,{id:res.id,kind:kindOf({type})});if(old&&validId(old.id)){try{await S.assets.delete(old.id)}catch(err){}}render()})}
+  if(r&&S.owner){e.preventDefault();e.stopPropagation();const key=r.dataset.slotreset,old=S.config.slots&&S.config.slots[key];
+    (async()=>{try{await setSlot(key,null);if(old&&validId(old.id)){try{await S.assets.delete(old.id)}catch(err){}}render();slotToast("Вернул общий арт","ok")}catch(err){slotToast("Не удалось сохранить","err")}})()}
+},true);
+function artButton(){let b=document.getElementById("artbtn");const show=S.owner&&S.assets&&["list","start","compare","rules"].includes(S.route);
+  if(!b){b=document.createElement("button");b.id="artbtn";b.type="button";b.onclick=()=>{S.artEdit=!S.artEdit;document.body.classList.toggle("artedit",S.artEdit);render()};document.body.appendChild(b)}
+  b.hidden=!show;b.textContent=S.artEdit?"✓ Готово":"✎ Арты на странице";b.classList.toggle("on",!!S.artEdit);if(!show&&S.artEdit){S.artEdit=false;document.body.classList.remove("artedit")}}
+
+/* ===== Роли и проверка ===== */
+const reviewersList=()=>(Array.isArray(S.config.reviewers)?S.config.reviewers:[]).filter(x=>typeof x==="string");
+const isReviewer=()=>S.owner||(!!S.uid&&reviewersList().includes(S.uid));
+const canSeeCheck=id=>S.owner||isReviewer()||id===S.uid;
+const playerName=id=>{const p=S.players[id];return (p&&p.discord)||S.names[id]||"участник"};
+const STATUS_TXT={approved:"одобрена",rework:"на доработке",pending:"на проверке"};
+
+/* ===== Старт и регистрация ===== */
+function renderStart(){
+  const p=pool(),reg=S.uid&&S.players[S.uid],step=S.startStep||"splash";
+  if(step==="splash"){
+    app.innerHTML=`<section class="splash"><div class="collage big">${[0,1,2,3,4].map(i=>`<div class="c c${i+1}">${slot("splash"+(i+1),i,i*3+2,i===0?"":SFXW[(i+2)%SFXW.length])}</div>`).join("")}</div>
+     <div class="splash-cap"><span class="tag">Текстовая ролевая игра · Discord</span><h1>БОГ<br>СТАРШЕЙ<br>ШКОЛЫ</h1>
+      <p>Создай бойца, заключи контракт с чарёком и пробейся через турнир. Каждый бой, тренировка и арка персонажа приносят SP.</p>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center"><button class="btn primary huge" type="button" id="play">НАЧАТЬ ИГРУ ▶</button><a class="btn huge dsbig" href="https://discord.gg/4MFwMvgspf" target="_blank" rel="noopener">DISCORD ↗</a></div>
+      ${reg?`<button class="linkbtn" type="button" id="skip" style="color:#fff">Я уже зарегистрирован, на главную</button>`:""}</div>
+     <div class="bang">ДООН!</div></section>
+    <div class="steps">${[["1","Регистрация","Укажи ник в Discord, чтобы все знали, чей это боец."],["2","Две анкеты","Заполни анкету персонажа и анкету чарёка, раскидай стартовые ранги."],["3","Проверка","Анкетолог проверит анкеты и ответит в чате проверки."],["4","Турнир","Бои, ивенты и тренировки дают SP на прокачку параметров."]]
+      .map(([n,t,d],i)=>`<div class="stepcard" style="--r:${[-1.2,.8,-.6,1][i]}deg"><span class="num">${n}</span><h3>${t}</h3><p>${d}</p></div>`).join("")}</div>`;
+    document.getElementById("play").onclick=()=>{S.startStep="reg";renderStart();window.scrollTo(0,0)};
+    const sk=document.getElementById("skip");if(sk)sk.onclick=()=>go("list");
+    return;
+  }
+  if(!S.uid){window.renderAuth&&window.renderAuth();return}
+  const cur=S.players[S.uid]||{};
+  app.innerHTML=`<div class="regwrap"><div class="regart">${slot("reg",5,11,"ВХОД!")}</div>
+   <form class="panel" id="regform" autocomplete="off" novalidate>
+    <div><span class="eyebrow">${reg?"Данные игрока":"Шаг 1 из 3"}</span><h1 style="font-size:clamp(26px,4vw,38px)">${reg?"ПРОФИЛЬ ИГРОКА":"РЕГИСТРАЦИЯ"}</h1></div>
+    <div class="notice" style="font-size:13.5px;display:grid;gap:6px"><b>Ты вошёл как ${esc(S.email||"игрок")}</b><span>Профиль привязан к этой почте: с любого устройства просто войди с той же почтой и паролем.</span><span class="muted" style="font-size:12.5px">Ник в Discord нужен не для входа, а чтобы все понимали, чей это персонаж.</span></div>
+    <div class="notice" style="font-size:13.5px">Ещё не на сервере? Заходи: <a href="https://discord.gg/4MFwMvgspf" target="_blank" rel="noopener" style="color:#5865F2;font-weight:700">discord.gg/4MFwMvgspf</a></div>
+    <div class="field"><label for="r-discord">Ник в Discord *</label><input class="input" id="r-discord" maxlength="40" placeholder="например, mori_jin" value="${esc(cur.discord||"")}"></div>
+    <div class="field"><label for="r-call">Как к тебе обращаться</label><input class="input" id="r-call" maxlength="40" value="${esc(cur.call||"")}"></div>
+    <div class="formgrid">
+     <div class="field"><label for="r-exp">Опыт в ТРП</label><select class="input" id="r-exp">${["","Первый раз","Немного играл","Опытный","Ветеран"].map(o=>`<option${o===(cur.exp||"")?" selected":""} value="${o}">${o||"— выбрать —"}</option>`).join("")}</select></div>
+     <div class="field"><label for="r-tz">Часовой пояс</label><select class="input" id="r-tz">${["","МСК−1 (Калининград)","МСК (Москва)","МСК+1","МСК+2 (Екатеринбург, Астана)","МСК+3 (Омск)","МСК+4","МСК+5","МСК+6","МСК+7 (Владивосток)","Другой"].map(o=>`<option${o===(cur.tz||"")?" selected":""} value="${o}">${o||"— выбрать —"}</option>`).join("")}</select></div>
+    </div>
+    <div class="field"><label for="r-src">Откуда узнал о сервере</label><input class="input" id="r-src" maxlength="120" value="${esc(cur.src||"")}"></div>
+    <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer"><input type="checkbox" id="r-ok" ${cur.agreed?"checked":""} style="width:20px;height:20px;flex:none;margin-top:2px"><span>Я прочитал <button class="linkbtn" type="button" id="r-rules">правила и систему прокачки</button> и согласен с ними *</span></label>
+    <div class="savebar"><button class="btn primary" type="submit">${reg?"Сохранить":"Зарегистрироваться"}</button>${reg?`<button class="btn" type="button" id="r-cancel">Назад</button>`:""}<span class="toast" id="r-t" role="status"></span></div>
+   </form></div>`;
+  document.getElementById("r-rules").onclick=()=>go("rules");
+  const rc=document.getElementById("r-cancel");if(rc)rc.onclick=()=>go("list");
+  document.getElementById("regform").onsubmit=async e=>{e.preventDefault();const t=document.getElementById("r-t"),v=id=>document.getElementById(id).value.trim();
+    const discord=v("r-discord");
+    if(discord.length<2){t.className="toast err";t.textContent="Укажи ник в Discord.";return}
+    if(!document.getElementById("r-ok").checked){t.className="toast err";t.textContent="Нужно согласиться с правилами.";return}
+    const body={discord:discord.slice(0,40),call:v("r-call").slice(0,40),exp:v("r-exp"),tz:v("r-tz"),src:v("r-src").slice(0,120),agreed:true,at:cur.at||new Date().toISOString()};
+    t.className="toast";t.textContent="Сохраняю…";
+    try{await S.db.doc("players/"+S.uid).set(body);S.players[S.uid]=body;S.startStep="splash";go(reg?"list":"list")}
+    catch(err){t.className="toast err";t.textContent=err&&err.code==="invalid_argument"?"Сервер отказал в записи. Выйди и войди в аккаунт заново.":"Не удалось сохранить. Попробуй ещё раз."}};
+}
+
+/* ===== Очередь анкет ===== */
+function renderQueue(){
+  if(!isReviewer()){go("list");return}
+  const ids=Object.keys(S.fighters);
+  const row=id=>{const f=S.fighters[id],r=rev(id),cy=cyOf(f);return `<div class="qrow">${avatarHTML(f,id)}
+    <div style="min-width:0;display:grid;gap:4px"><b style="font:17px var(--display)">${esc(f.name||"Без имени")}</b>
+     <span class="muted" style="font-size:12.5px">Discord: ${esc(f.discord||playerName(id))} · обновлено ${f.updatedAt?esc(new Date(f.updatedAt).toLocaleString("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})):"—"}</span>
+     <div style="display:flex;gap:6px;flex-wrap:wrap">${statusPill(r.status,"Персонаж")}${cy.none?"":statusPill(r.cyStatus,"Чарёк")}</div></div>
+    <button class="btn sm primary" type="button" data-check="${esc(id)}">${id===S.uid?"Открыть":"Проверить"}</button></div>`};
+  const st=id=>{const r=rev(id),cy=cyOf(S.fighters[id]);const parts=[r.status].concat(cy.none?[]:[r.cyStatus]);return parts.includes("pending")?"pending":parts.includes("rework")?"rework":"approved"};
+  const groups=[["pending","Ждут проверки"],["rework","На доработке"],["approved","Одобрены"]];
+  app.innerHTML=`<div class="pagehead"><span class="eyebrow">${S.owner?"ГМ":"Анкетолог"}</span><h1>АНКЕТЫ НА ПРОВЕРКУ</h1><span class="muted">Открой анкету, прочитай обе части и прими решение во вкладке «Проверка». Там же чат с игроком.</span></div>
+   ${ids.length?groups.map(([k,n])=>{const list=ids.filter(id=>st(id)===k).sort((a,b)=>String(S.fighters[a].updatedAt||"").localeCompare(String(S.fighters[b].updatedAt||"")));
+     return `<section class="sec" style="margin-bottom:26px"><h2>${n} · ${list.length}</h2>${list.length?`<div class="qlist">${list.map(row).join("")}</div>`:`<p class="muted" style="margin:0">Пусто.</p>`}</section>`}).join("")
+   :`<div class="empty"><h2>Анкет пока нет</h2></div>`}`;
+  app.querySelectorAll("[data-check]").forEach(b=>b.onclick=()=>{S.viewTab="check";go("view",b.dataset.check)});
+}
+
+/* ===== Вкладка «Проверка» и чат ===== */
+function checkBody(id){
+  const f=S.fighters[id],r=rev(id),cy=cyOf(f),me=S.uid,own=id===me,canDecide=isReviewer()&&(!own||S.owner);
+  const parts=[["status","Анкета персонажа"]].concat(cy.none?[]:[["cyStatus","Анкета чарёка"]]);
+  return `<div class="panel"><h2>Статус проверки</h2>
+    <div class="decide">${parts.map(([k,n])=>`<div class="dc"><span class="lbl">${n}</span>${statusPill(r[k],"")}
+      ${canDecide?`<div class="dbtns"><button class="btn sm" type="button" data-dec="${k}:approved">✓ Одобрить</button><button class="btn sm danger" type="button" data-dec="${k}:rework">↺ На доработку</button>${r[k]!=="pending"?`<button class="btn sm" type="button" data-dec="${k}:pending">На проверку</button>`:""}</div>`:""}</div>`).join("")}</div>
+    ${canDecide?`<div class="field"><label for="deccm">Комментарий к решению (уйдёт в чат)</label><input class="input" id="deccm" maxlength="300" placeholder="что исправить, что понравилось"></div>`:""}
+    ${isReviewer()&&own&&!S.owner?`<p class="muted" style="margin:0;font-size:13px">Свою анкету проверить нельзя, её примет другой анкетолог или ГМ.</p>`:""}
+    ${own&&!isReviewer()?`<p class="muted" style="margin:0;font-size:13px">Анкетолог напишет в чат ниже, если что-то нужно исправить. После правок анкета снова уходит на проверку.</p>`:""}
+    <span class="toast" id="dect"></span>
+    ${(r.history||[]).length?`<details><summary>История решений (${r.history.length})</summary><div class="log">${r.history.slice().reverse().map(h=>`<div><span>${esc(new Date(h.t).toLocaleString("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}))}</span><span>${esc(playerName(h.by))}: ${h.part==="cyStatus"?"чарёк":"персонаж"} → ${STATUS_TXT[h.to]||h.to}${h.comment?" — "+esc(h.comment):""}</span></div>`).join("")}</div></details>`:""}
+   </div>
+   <div class="panel chatpanel"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline"><h2>Чат проверки</h2><span class="muted" style="font-size:12.5px">видят игрок, анкетологи и ГМ</span></div>
+    <div class="chatlist" id="chatlist" aria-live="polite"><p class="muted" style="margin:0">Загружаю сообщения…</p></div>
+    <form class="chatform" id="chatform"><textarea class="input" id="chatin" maxlength="2000" placeholder="Сообщение… (Ctrl+Enter — отправить)" rows="2"></textarea><button class="btn primary" type="submit">Отправить</button></form>
+    <span class="toast" id="chatt"></span></div>`;
+}
+function myRole(fid){return S.owner?"gm":reviewersList().includes(S.uid)?"reviewer":fid===S.uid?"player":"other"}
+const ROLE_TXT={gm:"ГМ",reviewer:"анкетолог",player:"игрок",system:"решение",other:"участник"};
+function mountCheck(id){
+  if(S.chatUnsub){S.chatUnsub();S.chatUnsub=null}
+  const list=document.getElementById("chatlist");if(!list)return;
+  const draw=snap=>{const box=document.getElementById("chatlist");if(!box)return;const atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<40;
+    box.innerHTML=snap.empty?`<p class="muted" style="margin:0">Сообщений пока нет. Напиши первым.</p>`:snap.docs.map(d=>{const m=d.data()||{};const mine=m.by===S.uid,role=m.role||"other";
+      return `<div class="msg ${mine?"mine":""} ${role==="system"?"sys":""} r-${esc(role)}"><div class="mh"><b>${esc(playerName(m.by))}</b><span class="rl">${ROLE_TXT[role]||"участник"}</span><span class="muted">${m.t?esc(new Date(m.t).toLocaleString("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})):""}</span></div><div class="mt">${esc(m.text||"")}</div></div>`}).join("");
+    if(atBottom||!box.dataset.init){box.scrollTop=box.scrollHeight;box.dataset.init="1"}};
+  try{S.chatUnsub=S.db.collection("chats/"+id+"/msgs").orderBy("t").limit(400).onSnapshot(draw,()=>{const b=document.getElementById("chatlist");if(b)b.innerHTML=`<p class="muted" style="margin:0">Чат недоступен в этом просмотре.</p>`})}catch(e){}
+  const form=document.getElementById("chatform"),inp=document.getElementById("chatin"),t=document.getElementById("chatt");
+  const send=async()=>{const text=inp.value.trim();if(!text)return;t.textContent="";
+    try{await S.db.collection("chats/"+id+"/msgs").add({by:S.uid,role:myRole(id),text:text.slice(0,2000),t:new Date().toISOString()});inp.value=""}
+    catch(e){t.className="toast err";t.textContent=e&&e.code==="quota_exceeded"?"База заполнена, сообщи ГМу.":"Не удалось отправить. Обнови страницу и попробуй ещё раз."}};
+  form.onsubmit=e=>{e.preventDefault();send()};
+  inp.onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();send()}};
+  app.querySelectorAll("[data-dec]").forEach(b=>b.onclick=async()=>{const [part,to]=b.dataset.dec.split(":"),cm=(document.getElementById("deccm")||{}).value||"",dt=document.getElementById("dect");
+    const r=rev(id),body={status:r.status,cyStatus:r.cyStatus,history:(r.history||[]).concat({t:new Date().toISOString(),by:S.uid,part,to,comment:cm.trim().slice(0,300)}).slice(-100)};body[part]=to;
+    dt.className="toast";dt.textContent="Сохраняю…";
+    try{await S.db.doc("reviews/"+id).set(body);S.reviews[id]=body;
+      try{await S.db.collection("chats/"+id+"/msgs").add({by:S.uid,role:"system",text:`${part==="cyStatus"?"Анкета чарёка":"Анкета персонажа"}: ${STATUS_TXT[to]}${cm.trim()?". "+cm.trim().slice(0,300):""}`,t:new Date().toISOString()})}catch(e){}
+      renderView()}
+    catch(e){dt.className="toast err";dt.textContent="Не удалось сохранить решение."}});
+}
+
+/* ===== Анкетологи (панель ГМа) ===== */
+function reviewersPanel(){
+  const ids=Object.keys(S.players),rv=reviewersList();
+  return `<div class="panel" style="margin-bottom:28px"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline"><h2>Анкетологи · ${rv.length}</h2><span class="muted" style="font-size:13px">зарегистрировано игроков: ${ids.length}</span></div>
+   <p class="muted" style="margin:0;font-size:13.5px">Анкетолог видит вкладку «Анкеты», принимает или отправляет на доработку анкеты персонажей и чарёков и пишет в чаты проверки. Свою анкету анкетолог принять не может.</p>
+   ${ids.length?`<div class="tablewrap"><table class="t"><thead><tr><th>Discord</th><th>Аккаунт</th><th>Боец</th><th></th></tr></thead><tbody>${ids.sort((a,b)=>(rv.includes(b)-rv.includes(a))||playerName(a).localeCompare(playerName(b),"ru")).map(id=>`<tr><td><b>${esc(S.players[id].discord||"—")}</b></td><td>${esc(S.names[id]||"—")}</td><td>${S.fighters[id]?esc(S.fighters[id].name||"без имени"):'<span class="muted">нет</span>'}</td>
+     <td style="text-align:right">${rv.includes(id)?`<button class="btn sm danger" type="button" data-rv="${esc(id)}" data-on="0">Снять анкетолога</button>`:`<button class="btn sm" type="button" data-rv="${esc(id)}" data-on="1">Сделать анкетологом</button>`}</td></tr>`).join("")}</tbody></table></div>`
+   :`<p class="muted" style="margin:0">Пока никто не зарегистрировался.</p>`}<span class="toast" id="rvt"></span></div>`;
+}
+function wireReviewers(){
+  app.querySelectorAll("[data-rv]").forEach(b=>b.onclick=async()=>{const id=b.dataset.rv,on=b.dataset.on==="1";let rv=reviewersList().filter(x=>x!==id);if(on)rv=rv.concat(id);
+    try{S.config=Object.assign({},S.config,{reviewers:rv});await S.db.doc("config/main").set(S.config);renderGM()}catch(e){const t=document.getElementById("rvt");if(t){t.className="toast err";t.textContent="Не удалось сохранить."}}});
+}
+
+/* ===== Старт ===== */
+(function initRoute(){const h=(location.hash||"").slice(1);if(h.startsWith("f-")){S.route="view";S.view=h.slice(2)}else if(["list","edit","gm","rules","compare","queue","start"].includes(h))S.route=h})();
+render();
+(async()=>{
+  const c=window.claude;
+  const [db,user,assets]=c&&c.use?await Promise.all([c.use("db"),c.use("user"),c.use("assets")]):[null,null,null];
+  S.db=db;S.user=user;S.assets=assets;
+  if(user){const me=await user.me();S.uid=me.id;S.owner=!!me.isOwner;S.email=me.email||"";S.meName=me.name||""}
+  const gate=()=>{if(S.route!=="rules"&&S.route!=="start"&&(!S.uid||!S.players[S.uid])){S.route="start";S.startStep="splash"}};
+  if(!db){S.route=S.route==="rules"?"rules":"start";S.ready=true;render();return}
+  let got=0;const done=()=>{if(++got>=5&&!S.ready){gate();S.ready=true;render()}};
+  const live=()=>{if(S.ready&&!S.busy&&!["edit","gm","start"].includes(S.route)&&!(S.route==="view"&&S.viewTab==="check")&&!document.getElementById("capin")&&!document.querySelector(".lb"))render()};
+  db.collection("fighters").onSnapshot(snap=>{const m={};snap.docs.forEach(d=>m[d.id]=d.data());S.fighters=m;done();live();resolveNames()},()=>done());
+  db.collection("awards").onSnapshot(snap=>{const m={};snap.docs.forEach(d=>m[d.id]=d.data());S.awards=m;done();live()},()=>done());
+  db.collection("players").onSnapshot(snap=>{const m={};snap.docs.forEach(d=>m[d.id]=d.data());S.players=m;done();live()},()=>done());
+  db.collection("reviews").onSnapshot(snap=>{const m={};snap.docs.forEach(d=>m[d.id]=d.data());S.reviews=m;done();live()},()=>done());
+  db.doc("config/main").onSnapshot(s=>{S.config=s.exists?Object.assign({},s.data()):{};done();live()},()=>done());
+  setTimeout(()=>{if(!S.ready){gate();S.ready=true;render()}},8000);
+})();
+</script>
+
+</body>
+</html>
