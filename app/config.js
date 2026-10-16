@@ -1,8 +1,6 @@
-/* ===== НАСТРОЙКИ САЙТА «ЦАРЬ ГОРЫ» =====
-   Вставь сюда данные своего проекта Supabase:
-   Supabase → Project Settings → API (или Data API)            */
+/* ===== НАСТРОЙКИ САЙТА «ЦАРЬ ГОРЫ» ===== */
 window.GOH_CONFIG = {
-  SUPABASE_URL: "ВСТАВЬ_СЮДА_Project_URL",          // например https://abcdxyz.supabase.co
-  SUPABASE_ANON_KEY: "ВСТАВЬ_СЮДА_anon_public_key", // длинный ключ, начинается с eyJ...
-  DISCORD_LOGIN: false                              // true — показать кнопку «Войти через Discord» (см. README)
+  SUPABASE_URL: "https://lydteplxlviotjrnbksq.supabase.co",
+  SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5ZHRlcGx4bHZpb3Rqcm5ia3NxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNzg4OTEsImV4cCI6MjEwNzc1NDg5MX0.udgYDPTDuYAmk8BWF64eKdps7_MhuyCUFw14EDgPMjQ",
+  DISCORD_LOGIN: false
 };
