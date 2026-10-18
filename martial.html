@@ -141,6 +141,21 @@ dl.pass dd{font-weight:500;overflow-wrap:anywhere}
 .pm .r{display:flex;flex-wrap:wrap;gap:6px;align-items:center;color:#C9CFDF}
 .note{font-size:12.5px;color:var(--muted);border-left:3px solid var(--gold);padding-left:10px}
 footer{border-top:2px solid var(--line);padding-block:20px;color:var(--muted);font-size:13px}
+.lore{border:2px solid var(--line);background:var(--panel);margin-bottom:22px}
+.lore summary{cursor:pointer;list-style:none;padding:16px 20px;display:flex;align-items:center;gap:12px;font:20px var(--display)}
+.lore summary::-webkit-details-marker{display:none}
+.lore summary::before{content:"";width:10px;height:20px;background:var(--gold);transform:skewX(-18deg)}
+.lore summary::after{content:"＋";margin-left:auto;color:var(--gold)}
+.lore[open] summary::after{content:"−"}
+.lore .lb{padding:0 20px 20px;display:grid;gap:12px;max-width:80ch}
+.lore .lb p{margin:0;color:#C9CFDF}
+.lore .lb p.lead{font-style:italic;color:var(--ink)}
+.cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:4px 0 22px}
+.cat{all:unset;box-sizing:border-box;cursor:pointer;display:grid;gap:6px;align-content:start;padding:14px 16px;background:var(--panel);border:2px solid var(--line);border-left:6px solid var(--rc)}
+.cat:hover,.cat:focus-visible{border-color:var(--rc)}
+.cat b{font:16px var(--display);color:var(--rc)}
+.cat span{font-size:13.5px;color:#C9CFDF;line-height:1.5}
+.cat.one{cursor:default}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
 .gmbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;border:2px dashed var(--gold);background:rgba(255,210,63,.06);padding:12px 14px;margin-bottom:18px}
@@ -783,6 +798,14 @@ const media=s=>imgOf(s.id)?`${pic(imgOf(s.id))}`:art(hash(s.id),rc(s),"");
 const modChip=([k,v],cls)=>`<span class="mod ${cls}">${esc(ST[k]||k)} ${v>0?"+":""}${v}</span>`;
 let rf="all",tf="all",q="";
 
+/* ======= история и категории ======= */
+const LORE=[["lead", "В древние времена Землю делили люди, боги и чудовища. Чудовища были несравнимо сильнее людей и хотели властвовать над ними, а человечество жило в каменном веке — разрозненными кланами, и каждый клан выживал как мог."], ["", "Тогда Унгнё, вождь одного из кланов, обратилась к далёким богам с мольбой о силе. Боги долго решали и в конце концов согласились, но поставили условие: каждый раз, когда человек пользуется божественной силой, он старит или молодит себя. Так появился первый контракт с богами — то, что сегодня называют чарёком."], ["", "Один выдающийся клан тоже получил дар богов, но решил, что такая цена слишком высока. Его воины отказались зависеть от чужой силы и начали искать собственную: тренировали тело, оттачивали удары, захваты и шаги, передавали знания от мастера к ученику. Так родились боевые искусства — сила, которую человек создаёт сам."], ["", "Боевые искусства (무투 / 武闘, «Муту») — это системы и традиции боя, отточенные поколениями. Им учатся ради самозащиты, соревнований, физической формы и развития тела, разума и духа."], ["", "Мастер боевых искусств — воин, который сражается собственным телом: ударами, бросками, захватами. В мире «Бога старшей школы» граница размыта: мастерами считаются и фехтовальщики, и бойцы с посохом или копьём, и даже стрелки. Большинство стилей вселенной выросли из реальных единоборств, но довели их до сверхчеловеческого уровня."]];
+const CATS={"regular": "Реальные единоборства нашего мира в их привычном виде: бокс, борьба, дзюдо, каратэ, ММА и другие. Им учат в любой секции, они дают крепкую базу, но не скрывают особых секретов. Бонусы небольшие, зато стиль доступен любому бойцу с самого старта.", "advanced": "Традиционные школы, требующие долгого обучения у мастера: кендо, иайдо, айкидо, джит кун до, Система. Часть техник уже выходит за рамки спорта — работа с дыханием, перехват, внутренняя сила. Бонусы выше, у некоторых стилей есть особая способность.", "original": "Личные и родовые стили, созданные конкретными бойцами мира GoH: стиль Кан Дэхёпа, Lance de Combat Андре Оскара, Ссамсу Тхэккён, Македонская сарисса и другие. Они выросли из реальных искусств, но переработаны под своего создателя и полны авторских приёмов. Получить такой стиль можно только у наследника или по сюжету.", "special": "Вершина боевых искусств мира «Бога старшей школы»: Ре-Тхэквондо, Лунный Меч, Игла Набон, Хоахёракгёк и другие великие школы. Эти стили способны тягаться с силой чарёка и даже превосходить её. У них самые сильные техники и особые способности. Доступны только с разрешения ГМа, через наставника или по сюжету."};
+const CATRU={regular:"Обычные",advanced:"Редкие",original:"Эпические",special:"Легендарные"};
+const loreHtml=()=>`<details class="lore"><summary>История боевых искусств</summary><div class="lb">${LORE.map(([c,t])=>`<p class="${c}">${esc(t)}</p>`).join("")}</div></details>`;
+const catIn=k=>`<b>${RAR[k][0].toUpperCase()} · ${CATRU[k]}</b><span>${esc(CATS[k])}</span>`;
+const catHtml=()=>`<div class="cats">${rf==="all"?RORDER.map(k=>`<button type="button" class="cat" data-r="${k}" style="--rc:${RAR[k][1]}">${catIn(k)}</button>`).join(""):`<div class="cat one" style="--rc:${RAR[rf][1]}">${catIn(rf)}</div>`}</div>`;
+
 /* ======= главная ======= */
 function renderHome(){
   const list=STYLES.filter(s=>(rf==="all"||s.rarity===rf)&&(tf==="all"||s.types.includes(tf))&&(!q||[s.name,s.orig,s.founder,...s.masters.map(m=>m[0])].join(" ").toLowerCase().includes(q)))
@@ -792,9 +815,11 @@ function renderHome(){
     <p>Энциклопедия боевых искусств мира «Бога старшей школы»: мастера, пассивные баффы стилей, особые способности и техники с бонусами к параметрам.</p>
     <div class="counter"><div><b>${STYLES.length}</b><span>стилей</span></div><div><b>${nTech}</b><span>техник</span></div><div><b>${nM}</b><span>мастеров</span></div></div></div>
     <div class="art">${art(7,"#2EE6FF","FIGHT!")}</div></section>
+   ${loreHtml()}
    <div class="bar"><div class="chips"><button type="button" class="chip" data-r="all" aria-pressed="${rf==="all"}">Все редкости</button>${RORDER.map(k=>`<button type="button" class="chip r" style="--rc:${RAR[k][1]}" data-r="${k}" aria-pressed="${rf===k}" title="${RAR[k][2]}">${RAR[k][0]} · ${STYLES.filter(x=>x.rarity===k).length}</button>`).join("")}</div>
     <div class="barrow"><div class="chips">${[["all","Все типы"],...Object.entries(TYPES)].map(([k,n])=>`<button type="button" class="chip" data-t="${k}" aria-pressed="${tf===k}">${n}</button>`).join("")}</div>
     <input class="search" id="q" placeholder="Поиск: стиль, мастер…" value="${esc(q)}" aria-label="Поиск по стилям"></div></div>
+   ${catHtml()}
    ${list.length?`<div class="grid">${list.map(s=>`<div class="tw" data-slot="${esc(s.id)}"><button class="tile${s.rarity==="special"?" myth":""}" style="--rc:${rc(s)}" type="button" data-id="${s.id}" aria-label="${esc(s.name)}"><span class="frame"></span><span class="inner">${media(s)}<span class="shade"></span></span>
      <span class="p1">P1</span><span class="rar">${RAR[s.rarity][0]}</span>
      <span class="nm"><b>${esc(s.name)}</b><span>${esc(s.masters.map(m=>m[0]).slice(0,2).join(", ")||s.types.map(t=>TYPES[t]).join(" · "))}</span>${s.draft?'<span><span class="draft">уточняется</span></span>':""}</span></button></div>`).join("")}</div>`
