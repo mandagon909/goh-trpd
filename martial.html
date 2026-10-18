@@ -150,6 +150,9 @@ footer{border-top:2px solid var(--line);padding-block:20px;color:var(--muted);fo
 .gbtn.ghost{background:transparent;color:var(--gold)}
 .slotbtns{position:absolute;right:8px;top:8px;display:flex;gap:6px;z-index:3}
 .poster .slotbtns{right:12%;top:12px}
+.tw{position:relative;min-width:0}.tw .tile{width:100%}
+.tw .slotbtns{right:14%;top:40px}
+.slotbtns button{box-shadow:2px 2px 0 #07080D}
 .slotbtns button{width:34px;height:34px;border:2px solid #07080D;background:var(--gold);color:#07080D;font:16px var(--display);cursor:pointer}
 .slotbtns button.del{background:var(--red);color:#fff}
 .gtoast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:50;background:#07080D;border:2px solid var(--gold);color:var(--ink);padding:10px 16px;max-width:min(560px,calc(100vw - 32px));font-size:14px;white-space:pre-wrap}
@@ -778,9 +781,9 @@ function renderHome(){
    <div class="bar"><div class="chips"><button type="button" class="chip" data-r="all" aria-pressed="${rf==="all"}">Все редкости</button>${RORDER.map(k=>`<button type="button" class="chip r" style="--rc:${RAR[k][1]}" data-r="${k}" aria-pressed="${rf===k}" title="${RAR[k][2]}">${RAR[k][0]} · ${STYLES.filter(x=>x.rarity===k).length}</button>`).join("")}</div>
     <div class="barrow"><div class="chips">${[["all","Все типы"],...Object.entries(TYPES)].map(([k,n])=>`<button type="button" class="chip" data-t="${k}" aria-pressed="${tf===k}">${n}</button>`).join("")}</div>
     <input class="search" id="q" placeholder="Поиск: стиль, мастер…" value="${esc(q)}" aria-label="Поиск по стилям"></div></div>
-   ${list.length?`<div class="grid">${list.map(s=>`<button class="tile${s.rarity==="special"?" myth":""}" style="--rc:${rc(s)}" type="button" data-id="${s.id}" aria-label="${esc(s.name)}"><span class="frame"></span><span class="inner">${media(s)}<span class="shade"></span></span>
+   ${list.length?`<div class="grid">${list.map(s=>`<div class="tw" data-slot="${esc(s.id)}"><button class="tile${s.rarity==="special"?" myth":""}" style="--rc:${rc(s)}" type="button" data-id="${s.id}" aria-label="${esc(s.name)}"><span class="frame"></span><span class="inner">${media(s)}<span class="shade"></span></span>
      <span class="p1">P1</span><span class="rar">${RAR[s.rarity][0]}</span>
-     <span class="nm"><b>${esc(s.name)}</b><span>${esc(s.masters.map(m=>m[0]).slice(0,2).join(", ")||s.types.map(t=>TYPES[t]).join(" · "))}</span>${s.draft?'<span><span class="draft">уточняется</span></span>':""}</span></button>`).join("")}</div>`
+     <span class="nm"><b>${esc(s.name)}</b><span>${esc(s.masters.map(m=>m[0]).slice(0,2).join(", ")||s.types.map(t=>TYPES[t]).join(" · "))}</span>${s.draft?'<span><span class="draft">уточняется</span></span>':""}</span></button></div>`).join("")}</div>`
    :`<div class="empty">Ничего не нашлось.</div>`}`;
   app.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{rf=b.dataset.r;renderHome()});
   app.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{tf=b.dataset.t;renderHome()});
@@ -867,7 +870,7 @@ function gmTools(){
   const s=CUR&&STYLES.find(x=>x.id===CUR);
   const bar=document.createElement("div");bar.className="gmbar";
   if(s){
-    bar.innerHTML=`<b>Режим ГМа · картинки</b><span class="muted">«Пачкой» — выдели сразу много файлов. Файл с названием приёма (например «Хвечхук.png») ляжет в этот приём, файл «обложка.png» или с названием стиля — на обложку. Остальные лягут по порядку в приёмы без картинки. ✎ на рамке — заменить одну.</span><button class="gbtn" type="button" id="gbulk">Загрузить пачкой</button>`;
+    bar.innerHTML=`<b>Режим ГМа · картинки</b><span class="muted">«Пачкой» — выдели сразу много файлов. Файл с названием приёма (например «Хвечхук.png») ляжет в этот приём, файл «обложка.png» или с названием стиля — на обложку. Остальные лягут по порядку в приёмы без картинки. Проще всего — жми ✎ прямо на рамке нужного приёма или обложки: название файла не важно.</span><button class="gbtn" type="button" id="gbulk">Загрузить пачкой</button>`;
     const head=app.querySelector(".stack");head&&head.prepend(bar);
     document.getElementById("gbulk").onclick=()=>pickMany(files=>{
       const pairs=[],used=new Set(),rest=[];
@@ -885,7 +888,7 @@ function gmTools(){
       putImgs(pairs).then(()=>{if(extra>0)toast(`Лишних файлов: ${extra} — свободных рамок не осталось.`)});
     });
   }else{
-    bar.innerHTML=`<b>Режим ГМа · обложки стилей</b><span class="muted">Выдели сразу много файлов: каждый ляжет на обложку стиля с таким же названием («Вин Чун.jpg», «Кёкусинкай Каратэ.png», «wingchun.png»). Картинки приёмов загружаются на странице стиля.</span><button class="gbtn" type="button" id="gbulk">Обложки пачкой</button>`;
+    bar.innerHTML=`<b>Режим ГМа · обложки стилей</b><span class="muted">✎ на плитке — загрузить обложку этому стилю (название файла не важно). «Обложки пачкой» — сразу много файлов, если они названы как стили. Картинки приёмов — на странице стиля.</span><button class="gbtn" type="button" id="gbulk">Обложки пачкой</button>`;
     const g=app.querySelector(".bar");g&&g.before(bar);
     document.getElementById("gbulk").onclick=()=>pickMany(files=>{
       const pairs=[],miss=[];
