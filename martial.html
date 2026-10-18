@@ -155,6 +155,9 @@ footer{border-top:2px solid var(--line);padding-block:20px;color:var(--muted);fo
 .slotbtns button{box-shadow:2px 2px 0 #07080D}
 .slotbtns button{width:34px;height:34px;border:2px solid #07080D;background:var(--gold);color:#07080D;font:16px var(--display);cursor:pointer}
 .slotbtns button.del{background:var(--red);color:#fff}
+img.fg{object-fit:contain!important;z-index:1}
+img.bg{object-fit:cover;filter:blur(16px) brightness(.5);transform:scale(1.12)!important}
+.tile .shade{z-index:1}
 .gtoast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:50;background:#07080D;border:2px solid var(--gold);color:var(--ink);padding:10px 16px;max-width:min(560px,calc(100vw - 32px));font-size:14px;white-space:pre-wrap}
 .gtoast[hidden]{display:none}
 </style>
@@ -765,7 +768,7 @@ function art(seed,color,word){
   for(let i=0;i<64;i++){const a=i/64*Math.PI*2+(seed%9)*.03,r1=50+((i*29+seed)%70);l+=`<line x1="${(cx+Math.cos(a)*r1).toFixed(1)}" y1="${(cy+Math.sin(a)*r1).toFixed(1)}" x2="${(cx+Math.cos(a)*900).toFixed(1)}" y2="${(cy+Math.sin(a)*900).toFixed(1)}" stroke="${i%6===0?color:"#fff"}" stroke-width="${i%6===0?4:1}" stroke-opacity="${i%6===0?.75:.16}"/>`}
   return `<svg viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><radialGradient id="g${seed}" cx="${cx/6}%" cy="${cy/8}%" r="60%"><stop offset="0" stop-color="${color}" stop-opacity=".55"/><stop offset="1" stop-color="#07080D" stop-opacity="0"/></radialGradient></defs><rect width="600" height="800" fill="#0E1119"/>${l}<rect width="600" height="800" fill="url(#g${seed})"/>${word?`<text x="${cx}" y="${cy+30}" text-anchor="middle" font-family="Rubik Mono One,Arial Black" font-size="92" fill="#fff" fill-opacity=".9" stroke="#07080D" stroke-width="8" paint-order="stroke" transform="rotate(-8 ${cx} ${cy})">${word}</text>`:""}</svg>`}
 const rc=s=>RAR[s.rarity][1];
-const media=s=>imgOf(s.id)?`<img src="${esc(imgOf(s.id))}" alt="" loading="lazy">`:art(hash(s.id),rc(s),"");
+const media=s=>imgOf(s.id)?`${pic(imgOf(s.id))}`:art(hash(s.id),rc(s),"");
 const modChip=([k,v],cls)=>`<span class="mod ${cls}">${esc(ST[k]||k)} ${v>0?"+":""}${v}</span>`;
 let rf="all",tf="all",q="";
 
@@ -807,7 +810,7 @@ function renderStyle(id){
    ${s.ability?`<div class="card ability"><h2>Особая способность</h2><b class="an">${esc(s.ability[0])}</b><p>${esc(s.ability[1])}</p></div>`:""}
    <div class="card limits"><h2>Ограничения</h2><p>${esc(s.limits)}</p></div>
    <div class="card"><h2>Техники · ${s.moves.length}</h2><p class="note" style="margin-bottom:12px">Бонусы техник действуют только во время её использования.</p>
-    ${s.moves.length?`<div class="moves">${s.moves.map((m,i)=>`<div class="move"><div class="mart" data-slot="${esc(s.id+"|"+m.name)}">${imgOf(s.id+"|"+m.name)?`<img src="${esc(imgOf(s.id+"|"+m.name))}" alt="" loading="lazy">`:art(hash(s.id+i),rcol,"")}<span class="no">${String(i+1).padStart(2,"0")}</span></div>
+    ${s.moves.length?`<div class="moves">${s.moves.map((m,i)=>`<div class="move"><div class="mart" data-slot="${esc(s.id+"|"+m.name)}">${imgOf(s.id+"|"+m.name)?`${pic(imgOf(s.id+"|"+m.name))}`:art(hash(s.id+i),rcol,"")}<span class="no">${String(i+1).padStart(2,"0")}</span></div>
       <div class="mb"><div class="mh"><b>${esc(m.name)}</b>${m.type?`<span class="tag">${esc(m.type)}</span>`:""}${m.draft?'<span class="draft">уточняется</span>':""}</div><p>${esc(m.desc)}</p>
        <div class="pm"><span class="l p">Плюсы</span><span class="r">${(m.plus||[]).map(x=>modChip(x,"p")).join("")}${m.plusNote?`<span>${esc(m.plusNote)}</span>`:""}${!(m.plus||[]).length&&!m.plusNote?"—":""}</span>
        <span class="l m">Минусы</span><span class="r">${(m.minus||[]).map(x=>modChip(x,"m")).join("")}${m.minusNote?`<span>${esc(m.minusNote)}</span>`:""}${!(m.minus||[]).length&&!m.minusNote?"Отсутствуют.":""}</span></div></div></div>`).join("")}</div>`
@@ -820,6 +823,7 @@ function renderStyle(id){
 
 /* ======= картинки: хранятся в базе сайта, загружает ГМ ======= */
 let IMG={},ADMIN=false,DB=null,AS=null,IMGJSON="{}";
+const pic=u=>`<img class="bg" src="${esc(u)}" alt="" aria-hidden="true"><img class="fg" src="${esc(u)}" alt="" loading="lazy">`;
 const imgOf=k=>IMG[k]?(window.BLOB_BASE||"")+IMG[k]:"";
 const norm=x=>String(x||"").toLowerCase().replace(/ё/g,"е").replace(/\.[a-z0-9]+$/i,"").replace(/[^a-zа-я0-9]+/g,"");
 function toast(m,keep){const t=document.getElementById("gtoast");t.textContent=m;t.hidden=false;clearTimeout(t._t);if(!keep)t._t=setTimeout(()=>t.hidden=true,5000)}
