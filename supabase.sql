@@ -87,7 +87,7 @@ create policy docs_delete on public.docs for delete to authenticated using (
 create or replace function public.docs_guard() returns trigger
 language plpgsql security definer set search_path = public as $$
 declare
-  old_s text; old_c text;
+  old_s text; old_c text; old_t text;
 begin
   new.updated_at := now();
   new.col := regexp_replace(new.path, '/[^/]+$', '');
@@ -97,11 +97,12 @@ begin
 
   if new.col = 'reviews' then
     if tg_op = 'UPDATE' then
-      old_s := old.data->>'status'; old_c := old.data->>'cyStatus';
+      old_s := old.data->>'status'; old_c := old.data->>'cyStatus'; old_t := old.data->>'trStatus';
     end if;
     if not public.is_staff() or new.doc_id = auth.uid()::text then
       if (new.data->>'status' = 'approved' and coalesce(old_s,'') <> 'approved')
-         or (new.data->>'cyStatus' = 'approved' and coalesce(old_c,'') <> 'approved') then
+         or (new.data->>'cyStatus' = 'approved' and coalesce(old_c,'') <> 'approved')
+         or (new.data->>'trStatus' = 'approved' and coalesce(old_t,'') <> 'approved') then
         raise exception 'only reviewers can approve' using errcode = '42501';
       end if;
     end if;
