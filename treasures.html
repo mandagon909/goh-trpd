@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Национальные сокровища — Царь Горы | ТРП по «Богу старшей школы»</title>
+<meta name="description" content="Вики национальных сокровищ ТРП-сервера «Царь Горы»: все сокровища и артефакты из манхвы «Бог старшей школы», их носители и сила, а также одобренные сокровища игроков.">
+<meta name="theme-color" content="#07080D">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="app/config.js"></script>
+<script src="app/supabase-shim.js"></script>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=Rubik+Mono+One&family=Rubik:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: та же система, что вики боевых искусств (косые плитки, карточка-паспорт, мув-лист), но главный акцент — золото реликвий; цвет рамки = тип сокровища. Одна тёмная тема намеренно. */
+:root{
+  --bg:#0C0E15; --panel:#141824; --panel2:#1B2030; --line:#2A3146; --ink:#EEF1F8; --muted:#8C94AB; --soft:#C9CFDF;
+  --cy:#2EE6FF; --or:#FF6A1A; --gold:#FFD23F; --red:#FF3B5C; --green:#3DDC84; --vio:#B57CFF; --night:#07080D;
+  --display:"Russo One","Arial Black",sans-serif; --sfx:"Rubik Mono One","Russo One",sans-serif;
+  --body:"Rubik",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background-color:var(--bg);background-image:radial-gradient(rgba(255,210,63,.06) 1.2px,transparent 1.5px);background-size:10px 10px;color:var(--ink);font:15px/1.55 var(--body)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--night)}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;line-height:1.1;text-wrap:balance}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:#07080Dee;backdrop-filter:blur(6px);border-bottom:2px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;gap:16px;padding-block:10px;flex-wrap:wrap}
+.logo{display:flex;gap:10px;align-items:center;background:none;border:0;cursor:pointer;padding:0;text-align:left}
+.logo .k{font:20px var(--sfx);color:var(--night);background:var(--gold);padding:3px 10px 5px;clip-path:polygon(8% 0,100% 0,92% 100%,0 100%)}
+.logo .t{font:17px var(--display);letter-spacing:.03em}
+.logo small{display:block;font:500 10.5px var(--mono);color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.navr{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.navr a{font:14px var(--display);color:var(--ink);text-decoration:none;padding:7px 12px;border:2px solid var(--line);clip-path:polygon(6% 0,100% 0,94% 100%,0 100%)}
+.navr a:hover{border-color:var(--gold);color:var(--gold)}
+.navr a.ds{background:#5865F2;border-color:#5865F2;color:#fff}
+main{padding-block:26px 80px}
+.eyebrow{font:700 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.muted{color:var(--muted)}
+.flag{display:inline-flex;align-items:center;font:700 10.5px var(--mono);letter-spacing:.1em;color:var(--night);background:var(--red);padding:3px 8px;text-transform:uppercase}
+.flag.b{background:var(--gold)}
+
+.hero{position:relative;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);border:2px solid var(--line);background:var(--panel);overflow:hidden;margin-bottom:28px}
+@media (max-width:820px){.hero{grid-template-columns:1fr}}
+.hero .txt{padding:34px 30px;display:grid;gap:14px;align-content:center}
+.hero h1{font:clamp(24px,4vw,52px)/.95 var(--sfx);letter-spacing:-.02em;overflow-wrap:anywhere}
+.hero h1 em{font-style:normal;color:var(--gold);display:block}
+.hero p{margin:0;max-width:52ch;color:var(--soft)}
+.hero .art{position:relative;min-height:300px;clip-path:polygon(14% 0,100% 0,100% 100%,0 100%)}
+@media (max-width:820px){.hero .art{clip-path:none;min-height:200px}}
+.hero .art svg{position:absolute;inset:0;width:100%;height:100%}
+.counter{display:flex;gap:20px;flex-wrap:wrap}
+.counter div{display:grid}
+.counter b{font:30px var(--display);color:var(--gold)}
+.counter span{font:600 11px var(--mono);color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+
+.sec{display:grid;gap:14px;margin-bottom:30px}
+.sech{display:flex;align-items:center;gap:12px;font:24px var(--display)}
+.sech::before{content:"";width:12px;height:24px;background:var(--gold);transform:skewX(-18deg)}
+.lore{border:2px solid var(--line);background:var(--panel)}
+.lore summary{cursor:pointer;list-style:none;padding:16px 20px;display:flex;align-items:center;gap:12px;font:20px var(--display)}
+.lore summary::-webkit-details-marker{display:none}
+.lore summary::before{content:"";width:10px;height:20px;background:var(--gold);transform:skewX(-18deg)}
+.lore summary::after{content:"＋";margin-left:auto;color:var(--gold)}
+.lore[open] summary::after{content:"−"}
+.lore .lb{padding:0 20px 22px;display:grid;gap:12px;max-width:80ch}
+.lore .lb p{margin:0;color:var(--soft)}
+.lore .lb p.lead{font-style:italic;color:var(--ink);font-size:16px}
+.lore .lb h3{font-size:16px;color:var(--gold);margin-top:6px}
+
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:14px}
+.rule{background:var(--panel);border:2px solid var(--line);padding:16px 18px;display:grid;gap:10px;align-content:start;min-width:0}
+.rule h3{font-size:17px;display:flex;gap:10px;align-items:center}
+.rule h3::before{content:"";width:8px;height:16px;background:var(--rc,var(--gold));transform:skewX(-18deg)}
+.rule p{margin:0;color:var(--soft);font-size:14px}
+.rule ul{margin:0;padding-left:18px;display:grid;gap:6px;color:var(--soft);font-size:14px}
+.rule li b,.rule p b{color:var(--ink)}
+.rule.key{border-color:var(--gold);background:linear-gradient(135deg,rgba(255,210,63,.09),transparent 60%)}
+.no-list li::marker{color:var(--red)}
+
+.cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(210px,100%),1fr));gap:12px}
+.cat{all:unset;box-sizing:border-box;cursor:pointer;display:grid;gap:6px;align-content:start;padding:14px 16px;background:var(--panel);border:2px solid var(--line);border-left:6px solid var(--rc)}
+.cat:hover,.cat:focus-visible{border-color:var(--rc)}
+.cat[aria-pressed="true"]{border-color:var(--rc);background:var(--panel2)}
+.cat b{font:16px var(--display);color:var(--rc)}
+.cat span{font-size:13.5px;color:var(--soft);line-height:1.5}
+
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);background:var(--panel);padding:6px 14px;font:13px var(--display);cursor:pointer;clip-path:polygon(7% 0,100% 0,93% 100%,0 100%)}
+.chip[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--night)}
+.search{border:2px solid var(--line);background:var(--panel);padding:8px 12px;min-width:240px;max-width:100%}
+.search::placeholder{color:var(--muted)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+.tile{position:relative;display:block;text-align:left;cursor:pointer;padding:0;border:0;background:none;aspect-ratio:3/4;max-width:100%;transition:transform .14s}
+.tile .frame{position:absolute;inset:0;clip-path:polygon(10% 0,100% 0,90% 100%,0 100%);background:var(--rc)}
+.tile .inner{position:absolute;inset:3px 4px;clip-path:polygon(10% 0,100% 0,90% 100%,0 100%);background:var(--panel2);overflow:hidden}
+.tile .inner svg,.tile .inner img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.tile .shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(7,8,13,.96) 12%,rgba(7,8,13,.1) 62%)}
+.tile .rar{position:absolute;top:12px;right:15%;font:700 10px var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;background:#07080Dcc;border:1px solid var(--rc);color:var(--rc)}
+.tile .nm{position:absolute;left:12%;right:10%;bottom:16px;display:grid;gap:4px}
+.tile .nm b{font:20px/1.05 var(--display)}
+.tile .nm span{font-size:12.5px;color:var(--soft)}
+.tile:hover,.tile:focus-visible{transform:translateY(-4px)}
+.tile:hover .inner svg,.tile:hover .inner img{transform:scale(1.05)}
+.empty{border:2px dashed var(--line);padding:30px;text-align:center;color:var(--muted)}
+
+.form{border:2px solid var(--line);background:var(--panel);padding:16px 18px;display:grid;gap:12px}
+.form ol{margin:0;padding-left:22px;columns:2 280px;column-gap:28px;color:var(--soft);font-size:14px}
+.form li{break-inside:avoid;padding:3px 0}
+.form li b{color:var(--ink)}
+.form .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{border:2px solid var(--gold);background:var(--gold);color:var(--night);font:14px var(--display);padding:8px 14px;cursor:pointer;clip-path:polygon(5% 0,100% 0,95% 100%,0 100%)}
+.form pre{margin:0;max-height:260px;overflow:auto;background:var(--night);border:1px solid var(--line);padding:12px;font:12.5px/1.5 var(--mono);color:var(--soft);white-space:pre-wrap}
+
+.back{background:none;border:0;color:var(--gold);cursor:pointer;font:600 14px var(--body);padding:0;margin-bottom:14px}
+.sp{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:26px;align-items:start}
+@media (max-width:900px){.sp{grid-template-columns:1fr}}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 74px);display:grid;gap:16px}
+@media (max-width:900px){.side{position:static}}
+.poster{position:relative;aspect-ratio:3/4;max-width:100%}
+@media (max-width:900px){.poster{aspect-ratio:4/3}}
+.poster .frame{position:absolute;inset:0;clip-path:polygon(8% 0,100% 0,92% 100%,0 100%);background:var(--rc)}
+.poster .inner{position:absolute;inset:4px 5px;clip-path:polygon(8% 0,100% 0,92% 100%,0 100%);overflow:hidden;background:var(--panel2)}
+.poster .inner svg,.poster .inner img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.poster .vname{position:absolute;right:11%;top:20px;bottom:20px;writing-mode:vertical-rl;font:clamp(24px,3.4vw,38px)/1 var(--sfx);color:#fff;text-shadow:3px 3px 0 var(--night);overflow:hidden}
+.head{display:grid;gap:8px;margin-bottom:20px}
+.head h1{font-size:clamp(30px,5vw,54px)}
+.head .orig{font:600 14px var(--mono);color:var(--muted)}
+.badges{display:flex;gap:8px;flex-wrap:wrap}
+.badge{font:700 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border:2px solid currentColor}
+.card{background:var(--panel);border:2px solid var(--line);padding:16px 18px;min-width:0}
+.card h2{font-size:18px;margin-bottom:10px;display:flex;gap:10px;align-items:center}
+.card h2::before{content:"";width:10px;height:18px;background:var(--gold);transform:skewX(-18deg)}
+.card p{margin:0;max-width:72ch;color:var(--soft)}
+.stack{display:grid;gap:18px;min-width:0}
+dl.pass{margin:0;display:grid;grid-template-columns:auto 1fr}
+dl.pass dt,dl.pass dd{margin:0;padding:8px 0;border-top:1px solid var(--line)}
+dl.pass dt{color:var(--muted);font-size:13px;padding-right:12px}
+dl.pass dd{font-weight:500;overflow-wrap:anywhere}
+.mods{display:flex;flex-wrap:wrap;gap:6px}
+.mod{font:700 12.5px var(--mono);padding:3px 9px;border:1.5px solid currentColor;white-space:nowrap}
+.mod.p{color:var(--green)}.mod.m{color:var(--red)}
+.ult{border-color:var(--gold);background:linear-gradient(135deg,rgba(255,210,63,.1),transparent 60%)}
+.ult b.an{display:block;font:20px var(--display);color:var(--gold);margin-bottom:6px}
+.char{border-color:var(--vio)}
+.char h2::before{background:var(--vio)}
+.limits h2::before{background:var(--red)}
+.syn h2::before{background:var(--cy)}
+.people{display:flex;flex-wrap:wrap;gap:8px}
+.person{background:var(--panel2);border:1px solid var(--line);padding:6px 10px;font-size:13.5px;color:var(--soft)}
+.person b{display:block;font:14px var(--display);color:var(--ink)}
+.moves{display:grid;gap:14px}
+.move{display:grid;grid-template-columns:110px minmax(0,1fr);background:var(--panel2);border:2px solid var(--line);overflow:hidden}
+@media (max-width:560px){.move{grid-template-columns:1fr}.move .mart{min-height:80px}}
+.move .mart{position:relative;min-height:120px;background:var(--night)}
+.move .mart svg{position:absolute;inset:0;width:100%;height:100%}
+.move .mart .no{position:absolute;left:8px;bottom:6px;font:26px var(--sfx);color:#fff;text-shadow:2px 2px 0 var(--night)}
+.move .mb{padding:12px 14px;display:grid;gap:8px;min-width:0}
+.move .mh{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.move .mh b{font:17px var(--display)}
+.move .tag{font:700 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;background:var(--night);border:1px solid var(--line);color:var(--gold)}
+.move p{margin:0;font-size:14px;color:var(--soft);white-space:pre-wrap}
+.move p b{color:var(--ink)}
+.pm{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:start;font-size:13.5px}
+.pm .l{font:700 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding-top:4px}
+.pm .l.p{color:var(--green)}.pm .l.m{color:var(--red)}
+.pm .r{display:flex;flex-wrap:wrap;gap:6px;align-items:center;color:var(--soft)}
+.note{font-size:12.5px;color:var(--muted);border-left:3px solid var(--gold);padding-left:10px;margin:0}
+footer{border-top:2px solid var(--line);padding-block:20px;color:var(--muted);font-size:13px}
+.tile.myth .frame,.poster.myth .frame{background:linear-gradient(135deg,#FF3B5C,#FFD23F,#B57CFF,#2EE6FF);background-size:300% 300%;animation:myth 4s linear infinite}
+@keyframes myth{to{background-position:300% 0}}
+.sel{min-width:170px;cursor:pointer}
+.sel option{background:var(--panel);color:var(--ink)}
+.txtb{display:grid;gap:10px}
+.manhwa h2::before{background:var(--cy)}
+.look h2::before{background:var(--vio)}
+.can{border-color:#3A4260}
+.cats{margin-bottom:4px}
+.herotry{position:absolute;right:12px;bottom:12px;z-index:2;cursor:pointer;font:13px var(--display);background:var(--gold);color:var(--night);padding:6px 12px;border:2px solid var(--night)}
+.tile .who{position:absolute;top:40px;right:15%;font:700 10px var(--mono);letter-spacing:.1em;padding:3px 7px;background:var(--gold);color:var(--night)}
+
+.tile .frame,.tile .inner,.poster .frame,.poster .inner{clip-path:none}
+.tile img.fg{object-fit:cover;object-position:50% 12%}
+.poster.hasimg{aspect-ratio:auto;padding:4px;background:var(--rc)}
+.poster.hasimg .frame,.poster.hasimg .vname{display:none}
+.poster.hasimg .inner{position:relative;inset:auto}
+.poster.hasimg img.fg{position:relative!important;inset:auto!important;height:auto!important;max-height:80vh;display:block;width:100%}
+.gmbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;border:2px dashed var(--gold);background:rgba(255,210,63,.06);padding:12px 14px;margin-bottom:18px}
+.gmbar b{font:15px var(--display);color:var(--gold)}
+.gmbar .muted{font-size:13px;flex:1 1 260px}
+.gbtn{border:2px solid var(--gold);background:var(--gold);color:#07080D;font:14px var(--display);padding:7px 14px;cursor:pointer}
+.tw{position:relative;min-width:0}.tw .tile{width:100%}
+.slotbtns{position:absolute;right:10px;top:10px;display:flex;gap:6px;z-index:3}
+.tw .slotbtns{top:auto;bottom:70px}
+.slotbtns button{width:34px;height:34px;border:2px solid #07080D;background:var(--gold);color:#07080D;font:16px var(--display);cursor:pointer;box-shadow:2px 2px 0 #07080D}
+.slotbtns button.del{background:var(--red);color:#fff}
+.gtoast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:50;background:#07080D;border:2px solid var(--gold);color:var(--ink);padding:10px 16px;max-width:min(560px,calc(100vw - 32px));font-size:14px;white-space:pre-wrap}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="top"><div class="wrap">
+  <button class="logo" id="home" type="button"><span class="k">НС</span><span class="t">НАЦИОНАЛЬНЫЕ СОКРОВИЩА<small>Царь Горы · вики реликвий</small></span></button>
+  <nav class="navr"><a href="./">← Царь Горы</a><a href="martial.html">Боевые искусства</a><a href="traits.html">Трейты</a><a href="orgs.html">Организации</a><a href="#" id="toall">Все сокровища</a><a href="#" id="torules">Правила</a><a class="ds" href="https://discord.gg/4MFwMvgspf" target="_blank" rel="noopener">Discord ↗</a></nav>
+</div></header>
+<main class="wrap" id="app"></main>
+<div class="gtoast" id="gtoast" role="status" hidden></div>
+<input type="file" id="gfile" accept="image/*" hidden>
+<input type="file" id="gfiles" accept="image/*" multiple hidden>
+<footer><div class="wrap">Вики национальных сокровищ ТРП-сервера «Царь Горы» по манхве «Бог старшей школы». Список и бонусы — правила сервера, их утверждает ГМ.</div></footer>
+
+<script>
+/* ======= СПРАВОЧНИКИ ======= */
+const ST={str:"Сила",spd:"Скорость",dur:"Стойкость",end:"Выносливость",tech:"Техника БИ",ctrl:"Контроль Чарёка",gp:"Запас GP",per:"Восприятие",all:"Все физ. параметры"};
+const TT={
+  melee:["Холодное оружие","#FF6A1A","Мечи, копья, посохи, булавы, топоры, кнуты и нунчаки. Самый большой класс сокровищ: оружие, прославленное в руках героев и мастеров, которое режет силу чарёка как сталь."],
+  ranged:["Стрелковое","#3DDC84","Луки, пистолеты, винтовки и ракетные установки. Сокровищам не важно, древний это лук или современный автомат: важна слава, которую предмет заработал в истории."],
+  guard:["Щиты и доспехи","#4D9CFF","Зеркала, щиты и боевые доспехи. Почти не ранят сами, зато держат удары, которые сносят здания, и делают носителя тем, кого невозможно пробить в лоб."],
+  relic:["Реликвии","#2EE6FF","Чаши, кресты, нити, карты и ларцы. Не оружие в привычном смысле: они лечат, связывают, обманывают и меняют правила боя вокруг носителя."],
+  divine:["Вещи богов и Мудрецов","#FFD23F","Оружие и снаряжение самих богов и Мудрецов. Стоят выше любого национального сокровища, в руки игроков попадают только по сюжету и с решения ГМа."]
+};
+const TORDER=["melee","ranged","guard","relic","divine"];
+
+/* ======= ИСТОРИЯ ======= */
+const LORE=[
+ ["lead","Национальные сокровища — это предметы из истории человечества, которые обрели огромную славу. Мечи героев, луки великих стрелков, чаши святых, доспехи полководцев. Чем громче слава предмета, тем больше силы он копит, и тем сильнее люди хотят им завладеть."],
+ ["","В Ватикане их называют халидомами — святынями. Каждая страна хранит свои сокровища как самое ценное, что у неё есть: в закрытых хранилищах, монастырях и курганах, под охраной людей, о которых не знает даже правительство. В музеях часто лежат копии, а оригиналы видели единицы."],
+ ["h","Откуда они берутся"],
+ ["","Одни сокровища дарят боги или совет контракторов. Другие создают великие мастера-оружейники. Третьи просто становятся сокровищами со временем: слава, которая веками копится вокруг вещи, сама наполняет её силой. Поэтому среди сокровищ есть и древний лук Геракла, и нунчаки Брюса Ли, и южнокорейский автомат K2."],
+ ["","Важная деталь: сокровище, которое дал бог, — не оригинальное оружие этого бога, а его отражение. Настоящее оружие предка может призвать только его прямой потомок, когда раскрывает силу контракта до конца."],
+ ["h","У каждого сокровища своя воля"],
+ ["","Сокровище нельзя просто взять. Оно само выбирает хозяина, самого достойного из всех, кто к нему тянется. Это называют экзаменом на сертификацию национального сокровища: предмет откликается на того, кого признал. Меч может сам переместиться к своему человеку через весь город, и этим всё сказано."],
+ ["","Сокровища помнят прежних владельцев: их битвы, клятвы и смерть. Одни тяжелеют в чужих руках так, что их не поднять, другие обжигают, третьи просто молчат и не отдают ни капли силы. Носитель не владеет сокровищем, а заключает с ним союз."],
+ ["h","Что умеет любое сокровище"],
+ ["","Сокровище является к хозяину по зову или когда оно нужно, с любого расстояния. Оно может парить в воздухе и само лететь в руку. В бою оно усиливает удары, легко режет мощный чарёк и выдерживает атаки, которые сломали бы любое обычное оружие. А ещё сокровище умеет раздувать чарёк носителя, но только три раза подряд, после чего ему нужно время."],
+ ["h","Третий путь силы"],
+ ["","Боевое искусство человек строит сам, своим телом. Чарёк — контракт с богом, чужая сила взаймы. Сокровище — третий путь: сила, заключённая в предмете. Её нельзя выучить, её можно только получить. А значит, её можно потерять, отдать или отнять. Поэтому вокруг сокровищ всегда идёт охота: за ними гоняются NOX, чёрные коллекционеры, разведки чужих стран и боги, которые хотят вернуть своё."],
+ ["","На сервере «Царь Горы» сокровище — редкость. Большинство бойцов проходят весь путь без него. Тот, у кого оно есть, носит не просто оружие, а частицу истории своей страны и всё, что за ней тянется."]
+];
+
+/* ======= СОКРОВИЩА =======
+   type: melee | ranged | guard | relic | divine
+   wielder: [носитель в манхве, кто он]; holders: прошлые владельцы по мифу или истории
+   manhwa: что известно по манхве; can: что умеет (абзацы через \n\n)
+   passive: [[параметр, бонус]] — пока сокровище при носителе
+   ult: [название, описание]; plot:true — только по сюжету */
+const TREASURES=[
+ {id:"bongseon",look:"Прямой одноручный меч с узким клинком светлой стали, по которому при движении пробегает лунный отблеск. Гарда простая, крестовая, рукоять обмотана тёмно-красным шнуром, на навершии вырезан маленький иероглиф «奉先». В руке хозяйки меч почти невесомый, в чужих руках тяжелеет, как лом.",name:"Бонсон",orig:"봉선 · Bong-Seon",type:"melee",country:"Корея",wielder:["Ю Мира","25-я наследница стиля Лунного Меча"],holders:[["Люй Бу","великий воин Троецарствия, Фэнсянь"]],
+  about:"Меч, который носит второе имя величайшего воина Троецарствия Люй Бу — Фэнсянь, по-корейски «Бонсон». Говорят, в клинке живёт та ярость, с которой Люй Бу один прорубался через целые армии. Корея много лет хранила меч, и он не признавал ни одного хозяина.",
+  manhwa:"Принадлежит Ю Мире, чей чарёк — сам Люй Бу. Меч сам переместился к Мире, и этим экзамен на сертификацию был пройден: сокровище выбрало её. В списке её оружия есть и Клинок Татхагаты.",
+  can:"Бонсон — меч, созданный для скорости. Он выдерживает те взмахи Лунного Меча, на которых обычная сталь просто разлетается, и не тупится, сколько бы ни рубил. В руках хозяйки он режет силу чарёка так же легко, как ткань, и принимает удары, способные снести здание.\n\nГлавное в мече — его родство с Люй Бу. Если носитель связан с Люй Бу или другим великим воином Китая, Бонсон откликается особенно сильно: каждый из трёх подряд всплесков чарёка, которые даёт сокровище, превращает взмах в удар полководца. Меч чувствует намерение хозяина и ложится в руку раньше, чем тот успевает его позвать.\n\nДля носителя без такой связи это просто идеальный клинок: быстрый, острый, неломающийся, и он всегда возвращается к руке.",
+  passive:[["spd",3],["tech",3]],
+  ult:["Полководец Фэнсянь","За спиной носителя встаёт призрак Люй Бу с алебардой, и следующий удар мечом бьёт с силой, которой хватит, чтобы рассечь строй. Один раз за бой."],
+  limits:"Меч не терпит предательства: он помнит, как погиб Люй Бу, и отворачивается от носителя, который предал своих."},
+
+ {id:"walmung",look:"Длинный германский меч с широким прямым клинком и глубоким долом. На клинке выгравирован дракон, свернувшийся кольцом, гарда отлита в форме раскрытых крыльев. Рукоять под полторы руки обтянута потемневшей кожей, на навершии — круглый тусклый камень цвета драконьей крови.",name:"Вальмунг",orig:"Walmung · Balmung",type:"melee",country:"Германия",wielder:["Мун Гиджу","паладин ордена «Зигфрид»"],holders:[["Зигфрид","герой «Песни о Нибелунгах», убийца дракона"]],
+  about:"Меч Зигфрида из «Песни о Нибелунгах», которым герой убил дракона Фафнира. Искупавшись в крови дракона, Зигфрид стал неуязвимым, кроме одного места на спине, куда прилип липовый лист. Это место его и погубило.",
+  manhwa:"Халидом Мун Гиджу из ордена паладинов «Зигфрид». Его чарёк — дух, которому Вальмунг принадлежал изначально, поэтому меч и чарёк работают как одно целое. В бою Гиджу ставит невидимые щиты, лечит себя и союзников и слепит врагов шаровой молнией.",
+  can:"Вальмунг — меч драконоборца. Он рубит чешую, броню и магические барьеры, а против существ, чья сила идёт от чудовищ и зверей, бьёт особенно тяжело. Чем крупнее и страшнее противник, тем легче Вальмунг находит в нём слабое место.\n\nВместе с мечом носитель получает отблеск неуязвимости Зигфрида: удары, которые должны были ранить, соскальзывают с тела, а щиты носителя держатся дольше. Меч хорошо работает с защитными чарёками: он не только рубит, но и прикрывает.",
+  passive:[["str",3],["dur",3]],
+  ult:["Кровь Фафнира","На несколько ходов носитель покрывается роговой бронёй драконьей крови, и обычные атаки почти не ранят его. Одно уязвимое место остаётся: противник, который его найдёт, бьёт с двойной силой."],
+  limits:"Одна слабая точка. ГМ назначает её при одобрении, и если противник её узнал, неуязвимость против него не работает."},
+
+ {id:"durendal",look:"Длинный рыцарский меч с прямым клинком и одной старой выщербиной от удара о скалу, которая так и не затупила лезвие. Крестовина золочёная, рукоять из тёмного дерева. В полом навершии, по легенде, лежат реликвии святых, а рядом на перевязи висит рог Олифант из слоновой кости.",name:"Дюрандаль",orig:"Durandal",type:"melee",country:"Франция",wielder:["Аксли","владелец в манхве"],holders:[["Карл Великий","по легенде, получил меч от ангела"],["Роланд","паладин, погибший в Ронсевальском ущелье"]],
+  about:"Меч паладина Роланда. По легенде, в рукояти хранились святые реликвии. Умирая в Ронсевальском ущелье, Роланд пытался разбить меч о скалу, чтобы тот не достался врагу, но разрубил скалу, а клинок остался цел.",
+  manhwa:"Принадлежит Аксли. Подробно в бою меч не показан.",
+  can:"Дюрандаль — меч, который невозможно сломать. Он принимает удары тяжёлого оружия и техник, разрушающих предметы, и остаётся без зазубрины. Носитель может смело ставить блок против того, что разнесло бы любой другой клинок.\n\nВторое свойство — удар по скале. Вложив в замах всю силу, носитель рассекает щиты, доспехи и стены так же, как Роланд рассёк камень. Рядом с мечом носят рог Олифант: его звук слышен за километры, и союзники всегда знают, где носитель.\n\nМеч помнит последний бой Роланда. Тяжело раненный носитель держится на ногах дольше, чем должен.",
+  passive:[["dur",3],["str",2]],
+  ult:["Последний бой Роланда","Тяжело раненный носитель отказывается падать: до конца боя он не теряет сознание, а каждый удар Дюрандаля идёт с полной силой. После боя носитель без сил на сутки игрового времени."],
+  limits:"Клятва паладина: носитель не бежит с поля боя, пока рядом союзники. Нарушил клятву — до конца арки меч просто прочный клинок."},
+
+ {id:"tinydragon",look:"Две короткие чёрные палки из полированного дерева на стальной цепочке. На каждой вырезан маленький жёлтый дракон, концы окованы потёртым металлом. С виду обычные спортивные нунчаки, пока не начинают вращаться так быстро, что сливаются в чёрно-жёлтый круг.",name:"Нунчаки Маленького Дракона",orig:"Tiny Dragon's Nunchucks",type:"melee",country:"Китай",wielder:["Ма Бора","владелица в манхве"],holders:[["Брюс Ли","мастер, по прозвищу «Маленький Дракон»"]],
+  about:"Нунчаки, названные в честь Брюса Ли, чьё детское прозвище — «Маленький Дракон». Это одно из самых молодых сокровищ мира: оно родилось не из мифа, а из славы человека, который сделал боевые искусства легендой XX века.",
+  manhwa:"Принадлежат Ма Боре.",
+  can:"Нунчаки не тяжелеют и не ломаются, двигаются быстрее, чем видит глаз, и хлещут так, будто в каждый удар вложен вес всего тела. Серия не обрывается: палки сами подстраиваются под ритм носителя, и одна атака перетекает в другую без пауз.\n\nВращающаяся цепь работает как щит: носитель отбивает ей пули, ножи и метательные снаряды. Сокровище особенно хорошо в руках бойца джит кун до или вин чуна. Принцип «будь как вода» делает их продолжением рук, и связки стиля начинают работать вместе с оружием.",
+  passive:[["spd",4],["tech",2]],
+  ult:["Крик дракона","Носитель издаёт знаменитый боевой крик и выпускает десятки ударов за секунду, каждый из которых пробивает защиту. Один раз за бой."],
+  limits:"Против бойца на большой дистанции нунчаки мало что дают."},
+
+ {id:"teddy",look:"Коричневый плюшевый медведь размером с ребёнка, с глазами-пуговицами и бантом на шее. Из спины торчит пусковая труба, в животе спрятан барабан на несколько ракет. Медведь потрёпан и зашит в нескольких местах — похоже, это не первая его война.",name:"Мишка-ракетомёт Mk.3",orig:"Teddy-Bear Launcher Mk.3",type:"ranged",country:"Неизвестно",wielder:["Сатурн","владелец в манхве"],holders:[],
+  about:"Самое странное из известных сокровищ: ракетная установка в виде плюшевого медведя. Номер Mk.3 намекает, что до неё были ещё две модели. Это лучшее доказательство того, что сокровищем делает слава, а не возраст.",
+  manhwa:"Принадлежит Сатурну.",
+  can:"Мишка стреляет ракетами, которые по силе взрыва не уступают армейским, и может менять снаряды: фугасные, зажигательные, дымовые. Обычных боеприпасов ему не нужно: после короткой паузы сокровище само наполняет себя снова.\n\nКак любое сокровище, он прилетает к хозяину по зову и пробивает защиту чарёка. Противники часто не принимают игрушку всерьёз до первого залпа, и этим стоит пользоваться.",
+  passive:[["per",3],["str",2]],
+  ult:["Медвежий залп","Носитель выпускает весь запас ракет разом и накрывает область сплошными взрывами. После этого мишка «спит» до конца боя."],
+  limits:"Стрелять вплотную опасно и для самого носителя."},
+
+ {id:"grail",look:"Простая чаша размером с ладонь, из потемневшего дерева, без украшений. В спокойном состоянии её легко принять за обычную посуду. Когда сокровище работает, чаша сама наполняется прозрачной водой и светится изнутри мягким белым светом.",name:"Святой Грааль",orig:"Holy Grail · Sangreal",type:"relic",country:"Ватикан",wielder:["Пауль","носитель в манхве"],holders:[["Иосиф Аримафейский","по преданию, собрал в чашу кровь Христа"],["Сэр Галахад","рыцарь Круглого стола, нашедший Грааль"]],
+  about:"Чаша, из которой, по преданию, пили на Тайной вечере. Рыцари Круглого стола искали её годами, и найти её смог только чистый сердцем Галахад. Ватикан хранит Грааль как одну из главных своих святынь.",
+  manhwa:"Халидом Пауля. В Ватикане национальные сокровища называют халидомами.",
+  can:"Грааль — сокровище исцеления. Носитель наполняет чашу водой и даёт её выпить раненому или выливает на рану: раны затягиваются за секунды, кости срастаются, кровь останавливается. Вода Грааля смывает яды, проклятия, контроль разума и эффекты, наложенные чужим чарёком.\n\nКогда чаша светится, союзники рядом с носителем чувствуют прилив сил: дыхание выравнивается, страх уходит, и они могут сражаться дольше. Грааль не делает носителя сильнее в ударе, но превращает его в того, кого почти невозможно добить и за кем идут остальные.",
+  passive:[["end",3],["ctrl",2]],
+  ult:["Воскрешение","Если союзник погиб не больше минуты назад, носитель выливает на него всю воду Грааля, и тот возвращается к жизни с половиной сил. Раз за всю игру и только с подтверждения ГМа; после этого Грааль «спит» до конца арки."],
+  limits:"Себя носитель лечит вдвое слабее. Если чашу используют ради убийства невинного, она просто пустеет."},
+
+ {id:"adameve",look:"Два длинноствольных пистолета одной формы: Адам — из белого металла с золотой гравировкой яблони, Ева — из чёрного металла с гравировкой змея. Рукояти из слоновой кости и чёрного дерева. Адама носят в правой руке, Еву — в левой.",name:"Адам и Ева",orig:"Adam & Eve",type:"ranged",country:"Ватикан",wielder:["Джон","носитель в манхве"],holders:[],
+  about:"Пара пистолетов, названных в честь первых людей из Книги Бытия. Ватикан хранит их как халидом.",
+  manhwa:"Принадлежат Джону.",
+  can:"Стволы работают в паре. Адам бьёт тяжёлой пулей, которая пробивает броню и щиты. Ева стреляет быстро и точно и находит цель даже за укрытием. Вместе они держат противника под огнём без единой паузы.\n\nВыстрелы освящены: против демонов, нечисти и тёмных чарёков они бьют вдвое сильнее. Обычных патронов пистолетам не нужно, и они не перегреваются.",
+  passive:[["per",3],["spd",2]],
+  ult:["Изгнание из рая","Носитель стреляет из обоих стволов в одну точку, и пули сливаются в луч белого света. Попавший на пару ходов теряет связь со своим чарёком."],
+  limits:"Если пистолеты разлучить, каждый работает вполовину силы."},
+
+ {id:"malleus",look:"Тяжёлая булава на длинной окованной рукояти с шипастым навершием из чёрного железа. На рукояти выбиты латинские строки из трактата, с навершия свисает цепочка с маленьким железным крестом. От булавы пахнет старым воском и дымом.",name:"Молот ведьм",orig:"Malleus Maleficarum",type:"melee",country:"Ватикан",wielder:["Мария","носительница в манхве"],holders:[],
+  about:"Булава, названная по трактату «Молот ведьм» 1486 года — книге, по которой столетиями судили «колдунов». Сокровище несёт в себе всю тяжесть этой истории.",
+  manhwa:"Принадлежит Марии.",
+  can:"Булава создана против колдовства. Её удар разбивает барьеры, иллюзии, проклятия и техники, созданные чарёком. Чем сильнее сверхъестественная защита противника, тем больнее бьёт молот: то, что держит меч, под булавой трескается.\n\nПо обычному бойцу без чарёка она работает как очень тяжёлая булава, не больше. Зато против контрактора, который прячется за силой бога, Молот ведьм — одно из самых опасных сокровищ в мире.",
+  passive:[["str",3],["ctrl",2]],
+  ult:["Суд инквизиции","Носитель обрушивает булаву на землю, и в круге вокруг него гаснут все чужие техники и барьеры. Один раз за бой."],
+  limits:"Против чистого боевого искусства без чарёка особые свойства не работают."},
+
+ {id:"kopia",look:"Пика длиной почти пять метров с полым древком в красно-белую полосу и небольшим флажком под наконечником. Наконечник гранёный, узкий, как жало. Когда носитель разгоняется, за его спиной проступают призрачные гусарские крылья из орлиных перьев.",name:"Копия",orig:"Kopia",type:"melee",country:"Польша",wielder:["Алдон Ски","владелец в манхве"],holders:[["Крылатые гусары","польская тяжёлая конница XVI–XVIII веков"]],
+  about:"«Копия» — польское название длинной кавалерийской пики крылатых гусар. С такими пиками гусары сокрушали армии, вдвое превосходящие их числом, а в 1683 году решили судьбу битвы под Веной.",
+  manhwa:"Принадлежит Алдону Ски.",
+  can:"Пика даёт носителю силу таранного удара. Разогнавшись, он бьёт с мощью несущейся конницы и пробивает щиты, строй и стены. Настоящие гусарские пики ломались после первого удара, а Копия не ломается никогда.\n\nЗа спиной носителя слышен шум крыльев: призрачные гусарские крылья пугают противника и сбивают ему концентрацию. На открытом месте носитель с Копией почти неостановим.",
+  passive:[["spd",3],["str",2]],
+  ult:["Атака под Веной","Носитель разгоняется, за ним встаёт призрачная гусарская хоругвь, и вся она таранит противника. Один раз за бой."],
+  limits:"Нужен разбег: в тесном помещении сила таранного удара падает."},
+
+ {id:"mjolnir",look:"Боевой молот с массивной прямоугольной головкой из тёмного металла, покрытой рунами, и непривычно короткой рукоятью, обмотанной кожей. На конце рукояти — ремешок-петля для броска. Перед ударом по рунам бегут голубые искры.",name:"Мьёльнир",orig:"Mjölnir",type:"melee",country:"Норвегия",wielder:["Анна","владелица в манхве"],holders:[["Тор","бог грома"]],
+  about:"Молот Тора, выкованный гномами Брокком и Эйтри. Рукоять у него короткая: Локи в облике мухи мешал кузнецам в последний момент. По мифу, молот всегда возвращается в руку хозяина и не ломается ни о что.",
+  manhwa:"Принадлежит Анне. Форма сокровища в манхве точно не показана, на вики его тип значится как неизвестный.",
+  can:"Мьёльнир бьёт молнией: в момент попадания из головки срывается разряд, который оглушает противника. Брошенный молот летит по прямой, сносит всё на пути и сам возвращается в руку.\n\nРаскрутив молот за ремешок и бросив его, носитель может лететь следом и за миг сокращать любую дистанцию. Над тем, кто держит Мьёльнир, всегда немного пахнет грозой.",
+  passive:[["str",4],["dur",2]],
+  ult:["Призыв бури","Носитель поднимает молот к небу, над полем собираются тучи, и в выбранную область бьёт столб молний. Один раз за бой."],
+  limits:"Пока молот в полёте, носитель безоружен. Двуручных ударов нет: рукоять слишком короткая."},
+
+ {id:"ascalon",look:"Прямой меч крестоносца с длинным узким клинком и крестовой гардой. На клинке выгравирован красный крест святого Георгия, навершие сделано в виде головы дракона, пронзённой копьём. Клинок всегда холодный на ощупь, даже рядом с огнём.",name:"Аскалон",orig:"Ascalon",type:"melee",country:"Великобритания",wielder:["Шим Бонса","владелец в манхве"],holders:[["Святой Георгий","победитель дракона, покровитель Англии"]],
+  about:"Меч святого Георгия, которым тот, по легенде, победил дракона и спас царевну. Георгий — покровитель Англии, его крест стоит на английском флаге.",
+  manhwa:"Принадлежит Шим Бонсе.",
+  can:"Аскалон — меч против чудовищ. Он пробивает чешую и шкуру, а огонь и яд не причиняют носителю вреда, пока клинок в руке. Против огромного противника меч находит одно точное место для удара.\n\nСвятой Георгий не знал страха, и меч передаёт это носителю: техники, внушающие ужас и подавляющие волю, на него почти не действуют.",
+  passive:[["dur",3],["str",2]],
+  ult:["Победа над змием","Носитель одним ударом пригвождает противника к земле, и тот не может двигаться, пока не вырвется. Против существ-чудовищ удар вдвое сильнее. Один раз за бой."],
+  limits:"Против обычного человека без чарёка особые свойства слабеют."},
+
+ {id:"mulungma",look:"Копьё с длинным листовидным наконечником и круглый щит, обтянутый кожей и окованный по краю металлом. На щите и у основания наконечника повторяется один и тот же выцветший узор: видно, что их делали как пару. В манхве внешний вид почти не показан.",name:"Мулунгма и Сеанн",orig:"Mulungma & Seanne",type:"guard",country:"Неизвестно",wielder:["Моджахед","владелец в манхве"],holders:[],
+  about:"Пара сокровищ: копьё Мулунгма и щит Сеанн. Происхождение пары в манхве не раскрыто.",
+  manhwa:"Принадлежат Моджахеду. Подробно в бою не показаны.",
+  can:"Копьё и щит работают как одно целое: щит держит удар, а копьё отвечает из-за его края, пока противник ещё открыт после атаки. Носитель, привыкший к этой паре, почти не делает лишних движений.\n\nЩит выдерживает атаки, которые пробили бы стену, а копьё легко режет чарёк. Пара особенно сильна в обороне и в долгом бою.",
+  passive:[["dur",3],["tech",2]],
+  ult:["Стена и остриё","Носитель на ход становится неподвижной стеной: щит принимает всё, а копьё отвечает на каждую атаку контрударом. Один раз за бой."],
+  limits:"Без одного предмета из пары второй теряет особые свойства. Данные в манхве скудные, ГМ может уточнить."},
+
+ {id:"torments",look:"Сотня с лишним предметов самого разного вида: мечи, топоры, посохи, копья, винтовки, базуки, гранаты. Со Ханрян не носит их при себе: сокровища являются по зову и выстраиваются вокруг него в воздухе. Многие носят имена корейских гор, праздников, храмов и символов.",name:"108 мук человечества",orig:"108 Torments of Mankind",type:"melee",country:"Корея",wielder:["Со Ханрян","глава Национальной ассоциации бездомных"],holders:[],
+  about:"Полный арсенал Со Ханряна: 108 национальных сокровищ. Число 108 в буддизме — число страстей и мук, которые держат человека в круге перерождений. Мечи, посохи, топоры, копья, винтовки, базуки и гранаты — Со Ханрян собрал их больше, чем кто-либо в мире.",
+  manhwa:"Со Ханрян одолжил свои сокровища Хуэй Мори, и все они сломались в его руках, кроме посоха Га Болг. Со Ханрян сражался с Зевсом и засунул ему в рот гранату, пожертвовав рукой и выбив богу зуб.",
+  can:"Сила арсенала — в разнообразии. Носитель вызывает нужное сокровище из любого места и меняет оружие посреди боя: меч для ближней схватки, топор против брони, винтовка против дальней цели, базука против толпы. Противник не может подготовиться, потому что не знает, что будет в руке через секунду.\n\nНа сервере это не одно сокровище, а коллекция. Носитель коллекции получает доступ к нескольким предметам сразу, но каждый слабее отдельного сокровища.",
+  passive:[["tech",3],["per",2]],
+  ult:["Сто восемь мук","Носитель вызывает весь арсенал разом, и десятки сокровищ обрушиваются на противника со всех сторон. Один раз за арку."],
+  limits:"Только по сюжету. Если сокровища ломаются, восстановить их может только ГМ.",plot:true},
+
+ {id:"gaebolg",look:"Простой деревянный посох в рост человека, тёмный, отполированный руками до блеска, с зарубками и заплатками из верёвки. Выглядит как палка нищего, и не случайно: это символ главы Национальной ассоциации бездомных. Ничто в нём не выдаёт, что он может ранить бога.",name:"Га Болг",orig:"Gáe Bolg",type:"melee",country:"Корея",wielder:["Со Ханрян","глава Национальной ассоциации бездомных"],holders:[["Кухулин","герой Ольстера, по мифу — копьё"]],
+  about:"В ирландском эпосе Га Болг — копьё Кухулина, которое раскрывало в ране тридцать зазубрин. В мире «Бога старшей школы» это простой с виду деревянный посох. Он символ главы Национальной ассоциации бездомных и самое освоенное сокровище Со Ханряна.",
+  manhwa:"В руках Со Ханряна этот посох мог ранить тело бога. Единственное из 108 сокровищ, которое не сломалось, когда Ханрян одолжил их Хуэй Мори.",
+  can:"Га Болг выглядит как палка нищего, и этим обманывает всех. Деревянный посох выдерживает удары, от которых ломается сталь, и бьёт с такой плотностью, что пробивает защиту богов. Носитель может вложить в посох всю силу тела, и посох не треснет.\n\nВ посохе живёт память ирландского копья: удары им оставляют раны, которые долго не закрываются, а брошенный посох находит цель, даже если та уклоняется. В Корее посох передают от главы ассоциации к следующему главе, и вместе с ним передаётся власть над всеми бездомными страны.",
+  passive:[["str",3],["dur",3]],
+  ult:["Удар, ранящий бога","Носитель вкладывает в посох всё, что у него есть, и наносит удар, который пробивает любую защиту, включая божественную. Один раз за бой."],
+  limits:"Выдача только по сюжету: посох принадлежит главе ассоциации и переходит лишь к его наследнику.",plot:true},
+
+ {id:"chohong",look:"Катана в простых чёрных ножнах. Клинок с красноватым отливом по линии закалки, цуба круглая и без украшений. Рукоять обмотана красной лентой.",name:"Чохон",orig:"Cho-hong",type:"melee",country:"Корея",wielder:["Со Ханрян","из 108 сокровищ"],holders:[],
+  about:"Катана из коллекции 108 сокровищ Со Ханряна.",
+  manhwa:"Одно из сокровищ Ханряна, сломалось в руках Хуэй Мори.",
+  can:"Чохон — меч скорости и чистого реза. Он выходит из ножен быстрее, чем противник замечает движение, и оставляет на цели тонкий, но глубокий разрез. Катана хорошо работает с иайдо и кендо: одно точное движение решает больше, чем серия.\n\nКак и все сокровища коллекции, Чохон режет чарёк и является к хозяину по зову.",
+  passive:[["spd",3],["tech",2]],
+  ult:["Алый рез","Мгновенное выхватывание: удар проходит раньше, чем противник начинает атаку, и прерывает её. Один раз за бой."],
+  limits:"Тонкий клинок плохо держит блок против тяжёлого оружия."},
+
+ {id:"chuseok",look:"Длинноствольное оружие с оптическим прицелом: ствол заметно длиннее, чем у обычной винтовки. Корпус тёмный, на прикладе выгравирована полная луна. Выглядит громоздким, но носитель держит его легко.",name:"Чусок",orig:"Chuseok",type:"ranged",country:"Корея",wielder:["Со Ханрян","из 108 сокровищ"],holders:[],
+  about:"Оружие с прицелом и очень длинным стволом. Названо в честь Чусока — корейского праздника урожая и полной луны.",
+  manhwa:"Одно из сокровищ Ханряна.",
+  can:"Чусок бьёт с огромной дистанции, на которой противник даже не видит стрелка. Длинный ствол даёт пуле силу пробить стену, а прицел позволяет попасть в щель доспеха.\n\nВ полнолуние, как говорят, оружие не промахивается вовсе. На сервере это значит: в ночном бою под открытым небом точность носителя выше.",
+  passive:[["per",4],["tech",1]],
+  ult:["Полная луна","Один выстрел, который попадает в цель, даже если та уклоняется или прячется. Один раз за бой."],
+  limits:"Медленно наводится: вплотную почти бесполезен."},
+
+ {id:"dabo",look:"Широкий тяжёлый клинок, похожий на огромный тесак, с прямым обухом и скошенным концом. На плоскости вытравлен многоярусный силуэт пагоды Дабо-тхап. Рукоять короткая, обмотанная тёмной тканью.",name:"Дабо",orig:"Dabo",type:"melee",country:"Корея",wielder:["Со Ханрян","из 108 сокровищ"],holders:[],
+  about:"Меч, похожий на тесак. Название отсылает к Дабо-тхап — Пагоде многих сокровищ в храме Пульгукса, одному из символов Кореи.",
+  manhwa:"Одно из сокровищ Ханряна.",
+  can:"Дабо — тяжёлый широкий клинок, который рубит, а не режет. Удар им ломает блок вместе с оружием противника. Пагода, давшая мечу имя, стоит больше тысячи лет, и меч так же устойчив: его невозможно выбить из руки.",
+  passive:[["str",3],["dur",2]],
+  ult:["Тысяча лет камня","Носитель на ход становится неподвижным, как пагода, и ни один удар не сдвигает его с места, а ответный удар Дабо идёт с двойной силой."],
+  limits:"Тяжёлый клинок медленнее обычного меча."},
+
+ {id:"daeungjeon",look:"Обоюдоострый клинок-тесак, широкий и почти прямоугольный, заточенный с обеих сторон. Металл светлый, с золотистым отливом, у основания клинка — узор из лотосов, как на дверях храмового зала. Рукоять длинная, под две руки.",name:"Тэунджон",orig:"Daeungjeon",type:"melee",country:"Корея",wielder:["Со Ханрян","из 108 сокровищ"],holders:[],
+  about:"Обоюдоострый меч-тесак. Тэунджон — главный зал буддийского храма, где стоит статуя Будды.",
+  manhwa:"Одно из сокровищ Ханряна.",
+  can:"Две режущие кромки позволяют бить в обе стороны без разворота клинка: каждый замах — двойной удар. Меч дышит спокойствием храмового зала: носитель не теряет головы даже в самом яростном бою, и техники, внушающие страх или ярость, на него действуют слабо.",
+  passive:[["tech",3],["ctrl",2]],
+  ult:["Зал Будды","Носитель на миг замирает, и вокруг него становится тихо: следующие два удара противника проходят мимо, а носитель отвечает двойным разрезом."],
+  limits:"Требует обеих рук."},
+
+ {id:"greenring",look:"Чёрно-зелёный рыцарский ланс: длинное коническое остриё и широкий раструб-щиток, прикрывающий руку. У основания острия — кольцо зелёного металла, которое вспыхивает в момент удара. Тяжёлый на вид, но двигается быстро.",name:"Зелёное кольцо",orig:"Green Ring",type:"melee",country:"Корея",wielder:["Со Ханрян","из 108 сокровищ"],holders:[],
+  about:"Чёрно-зелёный рыцарский ланс из коллекции Со Ханряна.",
+  manhwa:"Одно из сокровищ Ханряна.",
+  can:"Ланс создан для таранного выпада: носитель бьёт вперёд всем телом, и остриё пробивает строй и щиты. Конический наконечник защищает руку, поэтому лансом можно и колоть, и закрываться. Вокруг острия в момент удара вспыхивает зелёное кольцо света, которое расширяет зону поражения.",
+  passive:[["str",3],["spd",2]],
+  ult:["Кольцо прорыва","Носитель с разбега пробивает всё перед собой, и зелёная волна сносит противников по бокам от линии удара."],
+  limits:"Плох в тесноте и в ближнем клинче."},
+
+ {id:"k2",look:"Штурмовая винтовка в облике корейского автомата K2: тёмный корпус, складной приклад, изогнутый магазин. От армейского образца её отличают только едва заметные золотые насечки на ствольной коробке. Сокровище легко спутать с обычным оружием.",name:"K2",orig:"K2",type:"ranged",country:"Корея",wielder:["Со Ханрян","из 108 сокровищ"],holders:[],
+  about:"Штурмовая винтовка. Её реальный прототип — Daewoo K2, основной автомат армии Южной Кореи. Миллионы солдат прошли с ним службу, и эта слава сделала его сокровищем.",
+  manhwa:"Одно из сокровищ Ханряна.",
+  can:"K2 стреляет очередями, которые пробивают защиту чарёка, и не перегревается. Патронов сокровищу не нужно. Винтовка надёжна, как солдат-срочник: она не заедает и не подводит в самый важный момент.",
+  passive:[["per",3],["spd",1]],
+  ult:["Огневой вал","Носитель ведёт непрерывный огонь, не давая противнику поднять голову: тот не может атаковать, пока не уйдёт из-под обстрела."],
+  limits:"Пули не так сильны против богов и сверхпрочной защиты."},
+
+ {id:"k15",look:"Белая базука с толстой трубой и прицельной планкой. Корпус белоснежный, без единой царапины, на боку короткая маркировка «K15». Носитель держит её на плече одной рукой, хотя выглядит она тяжёлой.",name:"K15",orig:"K15",type:"ranged",country:"Корея",wielder:["Со Ханрян","из 108 сокровищ"],holders:[],
+  about:"Белая базука из коллекции Со Ханряна. Названа по корейскому армейскому индексу.",
+  manhwa:"Одно из сокровищ Ханряна.",
+  can:"Каждый выстрел K15 — взрыв, который сносит стену и разбрасывает толпу. Против брони и укреплений она незаменима. Как и все сокровища коллекции, она прилетает к хозяину и перезаряжается сама.",
+  passive:[["str",3],["per",1]],
+  ult:["Белый залп","Серия из трёх выстрелов в одну точку: пробивает любую защиту из камня, металла и щитов чарёка."],
+  limits:"Вплотную стрелять опасно для себя. Медленная перезарядка."},
+
+ {id:"mugunghwa",look:"Двусторонний топор на длинном тёмно-зелёном древке, с жёлтым остриём на каждом конце. Лезвия выгнуты как лепестки, а в центре древка вырезан пятилепестковый цветок мугунхва.",name:"Мугунхва",orig:"Mugunghwa",type:"melee",country:"Корея",wielder:["Со Ханрян","из 108 сокровищ"],holders:[],
+  about:"Топор с жёлтыми остриями на обоих концах. Мугунхва — сирийский гибискус, национальный цветок Кореи. Его имя значит «вечный цветок, который не увядает».",
+  manhwa:"Одно из сокровищ Ханряна.",
+  can:"Двусторонний топор бьёт обоими концами: носитель вращает его и рубит без пауз. Как цветок, который не увядает, топор не устаёт: чем дольше бой, тем свежее носитель себя чувствует.",
+  passive:[["str",3],["end",2]],
+  ult:["Неувядающий цветок","Носитель раскручивает топор и превращается в вихрь лезвий, задевая всех вокруг. Пока вихрь крутится, он не теряет Выносливость."],
+  limits:"Тяжёлый: медленно меняет направление удара."},
+
+ {id:"mireu",look:"Станковая снайперская винтовка с сошками и очень длинным стволом. Корпус серый, приклад украшен узором, похожим на нимб Будды. Её ставят на опору: держать на руках её почти невозможно.",name:"Мирык",orig:"Mireu",type:"ranged",country:"Корея",wielder:["Со Ханрян","из 108 сокровищ"],holders:[],
+  about:"Станковая снайперская винтовка. Имя отсылает к Мирык — Майтрее, Будде грядущего, который придёт спасти мир.",
+  manhwa:"Одно из сокровищ Ханряна.",
+  can:"Мирык бьёт с дистанции в километры. Винтовку ставят на опору, и выстрел пробивает здание насквозь. Носитель видит в прицел сквозь дым и пыль, а пуля летит так быстро, что от неё почти невозможно уйти.",
+  passive:[["per",4],["str",1]],
+  ult:["Грядущий","Носитель целится целый ход, и следующий выстрел бьёт с силой, способной ранить даже бога."],
+  limits:"Нужна опора и время на прицел. В ближнем бою бесполезна."},
+
+ {id:"seorak",look:"Белый топор с широким лезвием, жёлтым кольцом у основания и коричневым узором на рукояти, похожим на прожилки горной породы. Обух массивный: им можно бить как молотом.",name:"Сорак",orig:"Seorak",type:"melee",country:"Корея",wielder:["Со Ханрян","из 108 сокровищ"],holders:[],
+  about:"Белый топор с жёлтым кольцом и коричневым узором. Назван в честь Сораксана — одной из самых высоких и красивых гор Кореи.",
+  manhwa:"Одно из сокровищ Ханряна.",
+  can:"Топор тяжёл, как гора, и так же устойчив. Его удар раскалывает камень и проламывает защиту. Носитель, держащий Сорак, крепко стоит на земле: его трудно сбить с ног или отбросить.",
+  passive:[["str",4],["dur",1]],
+  ult:["Обвал","Носитель бьёт по земле, и перед ним рушится лавина камня."],
+  limits:"Медленный замах."},
+
+ {id:"bluecloud",look:"Узкий прямой меч с голубоватым клинком цвета ясного неба. По плоскости вьётся узор облаков, маленькая гарда сделана в форме арки моста. Остриё очень тонкое: меч создан для укола.",name:"Голубое облако",orig:"Blue Cloud",type:"melee",country:"Корея",wielder:["Со Ханрян","из 108 сокровищ"],holders:[],
+  about:"Меч, имя которого отсылает к Мосту голубых облаков — Чхонун-гё в храме Пульгукса, по которому, по преданию, путь ведёт из мира людей в мир Будды.",
+  manhwa:"В манхве им пробивают стену толщиной десять метров.",
+  can:"Голубое облако — меч прокола. Его колющий удар проходит сквозь стену толщиной в десять метров, а значит, и сквозь любую обычную защиту. Клинок лёгкий, носитель держит его одной рукой и бьёт точно.",
+  passive:[["str",3],["tech",2]],
+  ult:["Мост в иной мир","Один выпад, который пробивает всё на своей линии: стены, щиты и барьеры чарёка."],
+  limits:"Режущие удары слабее колющих."},
+
+ {id:"jeanne",look:"Тонкая рапира с длинным узким клинком и закрытой чашкой-гардой, украшенной лилиями — гербом французских королей. На эфесе вырезаны слова «Jhesus Maria». Сталь светлая, но у острия видны следы, похожие на копоть.",name:"Рапира Жанны д'Арк",orig:"Rapier of Jeanne D'Arc",type:"melee",country:"Франция",wielder:["Андре Оскар","мастер Lance de Combat"],holders:[["Жанна д'Арк","Орлеанская дева, героиня Столетней войны"]],
+  about:"Клинок, связанный с Жанной д'Арк — крестьянской девушкой, которая повела Францию к победе в Столетней войне и была сожжена на костре. Её прославили как святую, и вещь, связанная с ней, стала одной из главных святынь Франции.",
+  manhwa:"Принадлежит Андре Оскару, мастеру фехтовального стиля Lance de Combat.",
+  can:"Рапира — оружие точности. Она колет в щели защиты, а в руках фехтовальщика двигается так быстро, что противник видит только серию бликов. Носитель Lance de Combat получает от неё особую пользу: связки стиля становятся длиннее и точнее.\n\nВ клинке живёт вера Орлеанской девы. Он не подводит носителя в безнадёжном бою и даёт силу стоять, когда другие отступают. Вокруг острия иногда вспыхивает пламя: память о костре, на котором погибла Жанна.",
+  passive:[["spd",3],["tech",3]],
+  ult:["Знамя Орлеана","Носитель поднимает рапиру, и союзники вокруг получают её решимость: страх и подавление на них не действуют, а их удары сильнее до конца хода. Сам носитель бьёт серией горящих уколов."],
+  limits:"Тонкий клинок плохо держит блок тяжёлого оружия."},
+
+ {id:"apollon",look:"Тяжёлая боевая дубина из тёмного, почти чёрного дерева, утолщённая к концу и окованная бронзовыми кольцами. На кольцах выбиты солнечные лучи — знак Аполлона. Длиной в руку, массивная, но идеально сбалансированная.",name:"Посох Аполлона",orig:"Staff of Apollon",type:"melee",country:"Греция",wielder:["Самуэль Росинанте","капитан сборной Аргентины, позже Судья"],holders:[],
+  about:"Тяжёлая боевая дубина, связанная с греческими богами. Вики манхвы предполагает, что это настоящая дубина Геракла, которую Самуэль призывает, раскрывая силу контракта.",
+  manhwa:"Посох Аполлона оказался прочнее посоха, который Со Ханрян дал Хуэй Мори: при столкновении тот разлетелся. Самуэль — потомок Геракла и его контрактор.",
+  can:"Главное свойство дубины — прочность и вес. Она ломает чужое оружие при столкновении и не получает ни царапины. Удар ею несёт физическую мощь Геракла: проламывает защиту и отбрасывает противника.\n\nДля контрактора греческого героя или бога она раскрывается сильнее: каждый удар становится тяжелее, а техники силы работают вместе с ней.",
+  passive:[["str",4],["dur",2]],
+  ult:["Подвиг силы","Удар, в который носитель вкладывает силу Геракла: ломает оружие противника и сбивает его с ног."],
+  limits:"Тяжёлая: медленные удары, мало пользы против быстрого противника."},
+
+ {id:"heracles",look:"Большой составной лук из светлого рога и бронзы с тетивой, которая звенит как струна. На плечах лука выгравированы двенадцать подвигов. В полном облачении носитель надевает серебряные доспехи Геракла, синий плащ и шоколадную юбку с зелёными птеригами в золотой кайме.",name:"Лук Геракла",orig:"Bow of Heracles",type:"ranged",country:"Греция",wielder:["Самуэль Росинанте","капитан сборной Аргентины, позже Судья"],holders:[["Геракл","величайший герой Греции"]],
+  about:"Настоящий лук Геракла, выкованный Гефестом, кузнецом богов. Стрелы Геракла были отравлены ядом Лернейской гидры и убивали даже бессмертных.",
+  manhwa:"Самуэль случайно раскрыл силу контракта до конца и получил настоящий лук. В полном облачении на нём серебряные доспехи Геракла и синий плащ. Лук очень разрушителен, но уступает в прочности посоху Жуи Цзиньгу: Хуэй Мори разбил его своим посохом.",
+  can:"Стрелы лука бьют с силой, сравнимой с взрывом, и пробивают броню, стены и защиту чарёка. Носитель стреляет быстро и далеко, а выпущенная им стрела летит прямо, без снижения.\n\nВместе с луком приходят доспехи героя, которые защищают тело носителя. Для потомка Геракла лук — не сокровище, а наследство, и раскрывается полностью.",
+  passive:[["str",3],["per",3]],
+  ult:["Стрела гидры","Отравленная стрела: рана от неё не заживает и каждый ход отнимает силы, пока её не исцелят. Один раз за бой."],
+  limits:"Лук хрупок против божественного оружия: удар оружием уровня Мудреца может его сломать."},
+
+ {id:"kusanagi",look:"Прямой обоюдоострый меч древнего японского типа (цуруги) с простой рукоятью. Клинок светлый, с зеленоватым отливом, будто под металлом течёт вода. В полном облачении после Рагнарёка у меча вырастают ветви, а носителя покрывают самурайские доспехи.",name:"Кусанаги",orig:"草薙剣 · Kusanagi no Tsurugi",type:"melee",country:"Япония",wielder:["Кусанаги Кёити","первенец клана, носитель Ямата-но-Ороти"],holders:[["Сусаноо","нашёл меч в хвосте змея Ороти"],["Ямато Такэру","скосил мечом горящую траву"]],
+  about:"Одна из трёх императорских регалий Японии. Бог бури Сусаноо нашёл меч в хвосте восьмиглавого змея Ороти. Принц Ямато Такэру, окружённый огнём, скосил им траву, и ветер развернул пламя на врагов — отсюда имя «Косящий траву».",
+  manhwa:"У Кусанаги Кёити все три императорские регалии. В его клане змей Ороти запечатан в первенце и становится его чарёком. Меч усиливает разрезы Кёити, позволяет призывать из них Ороти и, главное, держать под контролем силу змея внутри. После Рагнарёка в полном облачении у меча вырастают ветви, а Кёити покрывают самурайские доспехи.",
+  can:"Кусанаги — меч-ключ к чудовищу. Без него сила Ороти рвёт носителя изнутри, с ним она подчиняется. Каждый разрез может выпустить змеиную голову, которая кусает цель вместо клинка, и восемь голов могут атаковать с разных сторон.\n\nКак меч бури, Кусанаги управляет ветром: широкий взмах посылает режущий вихрь, а встречный ветер разворачивает огонь и газ на атакующего. Для носителя без чарёка Ороти это мощный ветряной клинок; для носителя с ним — единственный способ не потерять себя.",
+  passive:[["tech",3],["ctrl",3]],
+  ult:["Ямата-но-Ороти","Носитель полностью выпускает силу змея, и на поле встаёт настоящий восьмиглавый Ороти. Только с мечом в руке носитель удерживает над ним контроль. Один раз за арку."],
+  limits:"Без меча носитель с чарёком Ороти рискует потерять контроль над телом."},
+
+ {id:"yata",look:"Круглое бронзовое зеркало размером со щит. Лицевая сторона идеально гладкая, на обороте — узор из восьми лучей. Кёити держит его как щит, и в нём отражается не только свет, но и движение противника.",name:"Зеркало Ята",orig:"八咫鏡 · Yata no Kagami",type:"guard",country:"Япония",wielder:["Кусанаги Кёити","владелец всех трёх регалий"],holders:[["Аматэрасу","богиня солнца, которую зеркалом выманили из пещеры"]],
+  about:"Вторая из трёх императорских регалий Японии. По мифу, этим зеркалом выманили из пещеры богиню солнца Аматэрасу, когда она спряталась и мир погрузился во тьму. Третья регалия — яшмовое ожерелье Ясакани.",
+  manhwa:"Сокровище Кусанаги Кёити, используется как щит. Даёт почти абсолютную защиту от прямых атак.",
+  can:"Зеркало принимает прямую атаку и гасит её почти полностью: удар кулаком, клинком, луч энергии, техника, летящая в лоб. Пока носитель держит зеркало перед собой, пробить его спереди почти невозможно.\n\nЗеркало отражает свет солнца и может ослепить противника вспышкой. Атаки сбоку, сзади и по площади оно держит гораздо хуже, поэтому опытный противник постарается зайти с фланга.",
+  passive:[["dur",4],["per",1]],
+  ult:["Свет Аматэрасу","Зеркало отражает одну атаку обратно в нападающего с полной силой и ослепляет всех, кто смотрел на него."],
+  limits:"Защищает только от прямой атаки: удары сбоку, сзади и по площади проходят."},
+
+ {id:"purplesnake",look:"Длинный кнут из тёмно-фиолетовой кожи, сплетённый как змеиная чешуя. Рукоять сделана в виде змеиной головы с зелёными камнями вместо глаз. В движении кнут извивается сам, будто живой.",name:"Пурпурный змей",orig:"Purple Snake",type:"melee",country:"Неизвестно",wielder:["Вайолет Элла Вонг Перес","владелица в манхве"],holders:[],
+  about:"Кнут из числа национальных сокровищ. Происхождение в манхве не раскрыто.",
+  manhwa:"Принадлежит Вайолет Элле Вонг Перес.",
+  can:"Кнут движется как живой змей: изгибается в воздухе, огибает блоки и бьёт с неожиданной стороны. Он достаёт цель на дистанции в десяток метров и может обвить руку, ногу или оружие противника, чтобы вырвать его или сбить с ног.\n\nУдар кнута оставляет жгучий след, который ослабляет мышцы, будто от яда.",
+  passive:[["spd",3],["tech",2]],
+  ult:["Укус","Кнут обвивает противника целиком и сжимается: тот не может атаковать, пока не вырвется, и каждый ход теряет силы."],
+  limits:"Слаб в ближнем клинче. Данные в манхве скудные, ГМ может уточнить."},
+
+ {id:"murasaki",look:"Катана в пурпурных лакированных ножнах. Клинок с фиолетовым отливом и волнистой линией закалки, похожей на языки пламени. Рукоять обмотана чёрно-лиловым шнуром, цуба в форме цветка.",name:"Демонический меч Мурасаки",orig:"Devil Sword: Murasaki",type:"melee",country:"Япония",wielder:["Эрик Син","владелец в манхве"],holders:[],
+  about:"Проклятый японский меч. «Мурасаки» значит «пурпурный». В японских легендах есть целый род «демонических мечей», которые жаждут крови и сводят хозяев с ума.",
+  manhwa:"Принадлежит Эрику Сину.",
+  can:"Мурасаки режет не только тело, но и силу: разрез оставляет пурпурный след, который рассеивает чарёк противника вокруг раны. Клинок жаждет крови, и с каждым пролитым ударом становится острее и быстрее.\n\nУ этой силы есть цена. Меч шепчет носителю, подталкивает к жестокости и не любит возвращаться в ножны, не напившись.",
+  passive:[["str",3],["spd",2]],
+  ult:["Пурпурная луна","Серия разрезов, каждый из которых сильнее предыдущего; если хоть один попал, меч требует продолжать до конца."],
+  limits:"Если за бой никто не ранен, носитель теряет Выносливость. Меч толкает к жестокости."},
+
+ {id:"jebe",look:"Сильно изогнутый монгольский составной лук из рога, дерева и сухожилий, обтянутый берёстой. Концы плеч загнуты назад, по ним идёт потёртый узор из красных полос. К луку прилагается колчан со стрелами в сером оперении.",name:"Лук Джэбэ",orig:"Jebe's Bow",type:"ranged",country:"Монголия",wielder:["Жрец Фанъу","владелец в манхве"],holders:[["Джэбэ","полководец Чингисхана"]],
+  about:"Лук Джэбэ, одного из лучших полководцев Чингисхана. По преданию, в бою он подстрелил коня под самим Чингисханом. Хан не казнил его, а взял к себе и дал имя «Джэбэ» — «стрела».",
+  manhwa:"Принадлежит жрецу Фанъу.",
+  can:"Монгольский составной лук бьёт дальше и сильнее любого другого. Стрелы Джэбэ точны даже с несущегося коня и на полном бегу: носитель стреляет в движении так же метко, как стоя.\n\nПервый выстрел по сильнейшему противнику — особый: он целит не в тело, а в опору. Стрела выбивает у противника то, на чём держится его сила: коня, оружие, позицию.",
+  passive:[["per",4],["spd",2]],
+  ult:["Стрела, сбившая хана","Выстрел, который лишает противника опоры: выбивает оружие, сбивает с ног или прерывает технику."],
+  limits:"Мало пользы вплотную."},
+
+ {id:"merlin",look:"Высокий посох из старого корявого дерева, выше человеческого роста. Навершие обвито корнями, в которых держится мутный кристалл. По древку вырезаны знаки, похожие на древние руны и карты звёзд.",name:"Посох Мерлина",orig:"Staff of Merlin",type:"relic",country:"Великобритания",wielder:["Арго","владелец в манхве"],holders:[["Мерлин","маг и наставник короля Артура"]],
+  about:"Посох Мерлина — величайшего мага британских легенд, наставника короля Артура, который видел будущее.",
+  manhwa:"Принадлежит Арго.",
+  can:"Посох — сокровище мага. Он усиливает техники чарёка, а не удары: носитель создаёт барьеры, иллюзии и потоки энергии сильнее и дольше. Через посох носитель видит на шаг вперёд и замечает атаку раньше, чем она начинается.\n\nВ бою посох служит и опорой, и оружием, но его главная ценность — в том, что он умножает силу контракта.",
+  passive:[["ctrl",4],["per",2]],
+  ult:["Пророчество Мерлина","Носитель видит следующий ход противника: на один ход все его атаки уходят в пустоту, а носитель бьёт без промаха."],
+  limits:"Слабое оружие ближнего боя."},
+
+ {id:"artemis",look:"Изящный серебряный лук, изогнутый как молодой месяц, с тонкой, почти невидимой тетивой. На рукояти выгравированы олень и полумесяц. Ночью лук слегка светится холодным лунным светом.",name:"Лук Артемиды",orig:"Bow of Artemis",type:"ranged",country:"Греция",wielder:["Леонардо","владелец в манхве"],holders:[["Артемида","богиня охоты и луны"]],
+  about:"Серебряный лук Артемиды, богини охоты и луны. Её стрелы приносили внезапную тихую смерть.",
+  manhwa:"Принадлежит Леонардо.",
+  can:"Стрелы лука летят бесшумно, и противник не слышит выстрела. Ночью лук светится лунным светом, а стрелы видят цель в темноте. Это оружие охотника: носитель выслеживает добычу, ждёт и бьёт один раз, но наверняка.",
+  passive:[["per",4],["spd",2]],
+  ult:["Лунная охота","Носитель метит цель, и до конца боя каждая его стрела наводится на неё сама."],
+  limits:"Днём и в тесноте лук слабее."},
+
+ {id:"gungnir",look:"Длинное копьё с узким наконечником, покрытым рунами. Древко из тёмного ясеня, ровное и прямое. Под наконечником — кольцо с двумя вороньими перьями, знаком Хугина и Мунина.",name:"Гунгнир",orig:"Gungnir",type:"melee",country:"Норвегия",wielder:["Абель","бывший член NOX, отступник"],holders:[["Один","верховный бог скандинавов"]],
+  about:"Копьё Одина, выкованное гномами. По мифу, оно никогда не промахивается и всегда возвращается в руку. Брошенный Гунгнир над вражеским войском значил, что оно обречено.",
+  manhwa:"Принадлежит Абелю, отступнику NOX, который искал Ключ. Его чарёк исполняет чужие желания.",
+  can:"Гунгнир не промахивается: брошенное копьё меняет полёт и находит цель, как бы она ни уклонялась. После броска копьё само возвращается к хозяину.\n\nКопьё несёт власть Одина над судьбой: тот, в кого оно нацелено, чувствует, что уже проиграл, и теряет решимость. Сокровище опасно в руках того, кто умеет ждать момента для единственного броска.",
+  passive:[["per",3],["str",3]],
+  ult:["Бросок судьбы","Копьё брошено над полем, и все противники в области получают удар. Тот, в кого оно попало, не может уклониться."],
+  limits:"Пока копьё в полёте, носитель безоружен."},
+
+ {id:"tathagata",look:"Прямой клинок из светлого золотистого металла без единой зазубрины, с простой рукоятью, обмотанной белой тканью. Вокруг клинка держится лёгкое сияние, как ореол на изображениях Будды. Выглядит спокойно и совсем не угрожающе.",name:"Клинок Татхагаты",orig:"Blade of Tathagata",type:"divine",country:"Индия",wielder:["Татхагата","Мудрец, Будда"],holders:[],
+  about:"Клинок Татхагаты — одного из имён Будды, «Так пришедшего». Оружие Мудреца, которое стоит выше любого национального сокровища.",
+  manhwa:"Принадлежит Татхагате. В списке оружия Ю Миры тоже значится Клинок Татхагаты.",
+  can:"Клинок рассекает не тело, а то, что держит силу: контракты, печати, иллюзии и привязанности. Удар им может отделить контрактора от его бога или разрубить технику, созданную чужой волей.\n\nВ руках носителя клинок спокоен, как сам Будда: он не тянет к жестокости и не жаждет крови. Его сила — в ясности.",
+  passive:[["tech",4],["ctrl",4]],
+  ult:["Срез привязанности","Удар, который на время отрезает противника от его чарёка и всех чужих сил."],
+  limits:"Только по сюжету и с решения ГМа.",plot:true},
+
+ {id:"sagecane",look:"Трость из гладкого тёмного дерева с изогнутой ручкой. С виду трость пожилого человека, ничем не выдающая своей силы. В манхве детали внешнего вида не раскрыты.",name:"Трость Мудреца",orig:"Cane of the Sage",type:"divine",country:"Неизвестно",wielder:["Король","владелец в манхве"],holders:[],
+  about:"Трость, которую называют тростью Мудреца. Подробности о ней в манхве скудны.",
+  manhwa:"Принадлежит Королю.",
+  can:"Трость — знак мудрости и власти. Её свойства на сервере раскрывает ГМ по сюжету. Известно одно: это вещь Мудреца, а значит, её сила выше любого обычного сокровища.",
+  passive:[["ctrl",4],["per",3]],
+  ult:["Слово Мудреца","Решает ГМ."],
+  limits:"Только по сюжету и с решения ГМа.",plot:true},
+
+ {id:"cross",look:"Крест длиной примерно с предплечье, из потемневшего металла. Края стёрты от прикосновений, в центре вставлен маленький прозрачный камень. Его носят на цепи или держат в руке.",name:"Крест",orig:"The Cross",type:"relic",country:"Неизвестно",wielder:["Пак Мубон","владелец в манхве"],holders:[],
+  about:"Религиозный символ, ставший национальным сокровищем. Крест — один из самых узнаваемых символов в истории человечества.",
+  manhwa:"Принадлежит Пак Мубону.",
+  can:"Крест — сокровище защиты от тьмы. Рядом с ним слабеют демоны, нечисть и тёмные чарёки, а их техники теряют силу. Носитель может поднять крест и выставить святой барьер, сквозь который тьма не проходит.\n\nКрест дарит носителю стойкость: пока он держит его, страх и подавление на него почти не действуют.",
+  passive:[["dur",3],["ctrl",3]],
+  ult:["Свет креста","Вспышка святого света, которая изгоняет тёмную силу из области вокруг носителя."],
+  limits:"Почти бесполезен как оружие против обычного бойца."},
+
+ {id:"sarissa",look:"Копьё длиной почти шесть метров из двух частей, соединённых бронзовой муфтой. Наконечник узкий, листовидный, на нижнем конце — бронзовый подток, чтобы втыкать копьё в землю. На муфте выбита звезда Вергины — знак македонских царей.",name:"Сарисса Филиппа II",orig:"Σάρισα · Philip II's Sarissa",type:"melee",country:"Греция",wielder:["Хосе Александорс","владелец в манхве"],holders:[["Филипп II","создатель македонской фаланги"],["Александр Македонский","сын Филиппа"]],
+  about:"Копьё длиной почти шесть метров, с которым царь Филипп II создал македонскую фалангу. Им сражался и его сын Александр.",
+  manhwa:"Принадлежит Хосе Александорсу вместе со щитом Гоплон.",
+  can:"Сарисса бьёт с дистанции, на которой противник не может ответить: шесть метров древка держат врага на расстоянии. Копьё помнит строй: ударив древком о землю, носитель поднимает призрачных гоплитов, которые держат фланги и выставляют стену копий.\n\nВместе со щитом Гоплон сарисса превращает носителя в целую фалангу. Стиль «Македонская сарисса» раскрывает её полностью.",
+  passive:[["str",2],["per",3]],
+  ult:["Гетайры","Призраки конницы Александра клином проносятся через поле боя и бьют каждого противника на пути. Один раз за бой."],
+  limits:"Вплотную копьё почти бесполезно."},
+
+ {id:"hoplon",look:"Большой круглый щит около метра в диаметре, глубокий, выгнутый как чаша. Лицевая сторона покрыта бронзой со звездой Вергины. Изнутри — ремень для предплечья и рукоять у края.",name:"Гоплон",orig:"Hoplon",type:"guard",country:"Греция",wielder:["Хосе Александорс","владелец в манхве"],holders:[["Гоплиты","тяжёлая пехота Древней Греции"]],
+  about:"Большой круглый щит греческих гоплитов. Спартанские матери говорили сыновьям: «Со щитом или на щите» — вернись победителем или мёртвым.",
+  manhwa:"Принадлежит Хосе Александорсу вместе с сариссой Филиппа II.",
+  can:"Гоплон держит удары, которые снесли бы стену. Он прикрывает не только носителя, но и того, кто стоит рядом: в строю фаланги каждый щит защищал соседа слева. Щитом можно и бить: удар кромкой ломает кости и сбивает с ног.",
+  passive:[["dur",4],["str",1]],
+  ult:["Со щитом или на щите","Пока носитель не сдвинулся с места, ни одна атака не проходит через щит к нему и союзнику рядом. Один раз за бой."],
+  limits:"Тяжёлый, снижает скорость."},
+
+ {id:"ariadne",look:"Клубок тонкой золотистой нити, блестящей на свету как шёлк. Нить кажется хрупкой, но разорвать её невозможно. Размотанная, она почти не видна.",name:"Нить Ариадны",orig:"Ariadne's Silk Thread",type:"relic",country:"Греция",wielder:["Судья G","Судья турнира"],holders:[["Ариадна","царевна Крита"],["Тесей","герой, победивший Минотавра"]],
+  about:"Нить, которую Ариадна дала Тесею, чтобы тот нашёл выход из Лабиринта после победы над Минотавром.",
+  manhwa:"Принадлежит Судье G.",
+  can:"Нить Ариадны всегда ведёт к выходу: носитель находит путь из любого лабиринта, иллюзии и запертого пространства. Нить тонкая, но её невозможно разорвать: ей связывают противника, ставят ловушки и растягивают сети.\n\nНить помнит, где была, поэтому носитель может проследить путь противника и найти его, даже если тот скрылся.",
+  passive:[["per",4],["tech",2]],
+  ult:["Лабиринт","Носитель опутывает область нитью, и противник не может выбраться, пока носитель его не отпустит."],
+  limits:"Слабое оружие прямого удара."},
+
+ {id:"rashomon",look:"Колода игральных карт с тёмными рубашками, на которых нарисованы старинные ворота под дождём. Лицевые стороны похожи на обычные карты, но картинки на них иногда меняются. Края карт острые, как бритва.",name:"Расёмон",orig:"羅生門 · Rashomon",type:"relic",country:"Япония",wielder:["Судья F","Судья турнира"],holders:[],
+  about:"Игральные карты, названные в честь ворот Расёмон в древнем Киото. По легендам, на этих воротах жили демоны, а рассказ и фильм «Расёмон» прославили их как символ того, что правда у каждого своя.",
+  manhwa:"Принадлежат Судье F.",
+  can:"Карты — сокровище обмана. Носитель бросает их как лезвия, но главное в другом: каждая карта несёт свою версию правды. Противник не может понять, где настоящая атака, а где обманка.\n\nКарты могут подменять реальность на короткое время: противник видит то, что ему показали, и бьёт мимо.",
+  passive:[["tech",3],["per",3]],
+  ult:["Каждому своя правда","На ход противник видит не то поле боя, что есть на самом деле."],
+  limits:"Против противника, который полагается на чутьё, а не на глаза, сила карт слабеет."},
+
+ {id:"guandao",look:"Китайская глефа: длинное древко, покрытое красным лаком, и широкое изогнутое лезвие с шипом и кольцами на обухе. Лезвие украшено узором зелёного дракона. Выглядит тяжёлой и древней.",name:"Безымянное гуаньдао",orig:"Unnamed Guandao",type:"melee",country:"Китай",wielder:["Судья B","Судья турнира"],holders:[["Гуань Юй","полководец Троецарствия"]],
+  about:"Гуаньдао — китайская глефа, которую связывают с полководцем Гуань Юем и его легендарным «Лунным клинком Зелёного дракона». Гуань Юя почитают в Китае как бога войны и верности.",
+  manhwa:"Принадлежит Судье B. Название сокровища в манхве не раскрыто.",
+  can:"Длинное древко и тяжёлое изогнутое лезвие дают удары огромного размаха. Глефа рубит конницу, строй и несколько противников одним взмахом.\n\nКак оружие бога верности, она особенно сильна, когда носитель защищает своих: если рядом ранен союзник, удары глефы тяжелеют.",
+  passive:[["str",3],["per",2]],
+  ult:["Зелёный дракон","Носитель описывает глефой полный круг, и волна зелёного света сносит всех вокруг."],
+  limits:"Медленная, тяжело работать в тесноте."},
+
+ {id:"laevateinn",look:"Широкий тяжёлый меч с клинком цвета раскалённого металла, по которому бегут тёмные трещины, как по остывающей лаве. Рукоять обмотана чёрной кожей, гарда простая. Рядом с мечом воздух всегда дрожит от жара.",name:"Лэватейн",orig:"Lævateinn",type:"melee",country:"Исландия",wielder:["Безымянный участник турнира","участник GoH"],holders:[],
+  about:"Лэватейн — оружие из древнеисландской поэзии, «губительный прут», который хранится в запертом ларце. Его часто связывают с огненным мечом Сурта, который сожжёт мир в Рагнарёк.",
+  manhwa:"В манхве им владеет безымянный участник турнира GoH.",
+  can:"Широкий меч несёт в себе огонь конца света: клинок раскаляется добела, и каждый удар оставляет горящий след. Он плавит металл и прожигает защиту, которую нельзя разрубить.",
+  passive:[["str",3],["gp",2]],
+  ult:["Пламя Рагнарёка","Носитель взмахивает мечом, и перед ним встаёт стена огня."],
+  limits:"Огонь задевает всё вокруг, включая союзников."},
+
+ {id:"yongpyo",look:"Доспех Короля обезьян: золотая кольчуга, шлем с длинными фениксовыми перьями и сапоги, шагающие по облакам. Сияет золотом и красным, как облачение небесного полководца.",name:"Доспех Ёнпхё",orig:"Yongpyo Armour",type:"divine",country:"Китай",wielder:["Король обезьян","Сунь Укун"],holders:[],
+  about:"Боевой доспех Короля обезьян. По «Путешествию на Запад», Сунь Укун выбил у Королей Драконов не только посох, но и доспехи: золотую кольчугу, шлем с фениксовыми перьями и сапоги, шагающие по облакам.",
+  manhwa:"Доспех Короля обезьян. Его носили клоны Объекта M.",
+  can:"Доспех даёт носителю защиту бога: удары обычных бойцов почти не проходят, а клинки соскальзывают. В нём носитель двигается так же свободно, как без него.\n\nНо даже божественный доспех можно пробить: техника мастера уровня Кёити оставляет на нём следы.",
+  passive:[["dur",4],["spd",2]],
+  ult:["Шаг по облакам","Носитель на ход поднимается в воздух и атакует с любой стороны."],
+  limits:"Только по сюжету и с решения ГМа.",plot:true},
+
+ {id:"ruyi",look:"Железный посох с золотыми обручами на обоих концах и надписью «Посох с золотыми обручами по желанию, весом 13 500 цзиней». В обычном виде он длиной в человеческий рост, но может стать иглой или столпом до неба.",name:"Посох Жуи Цзиньгу",orig:"如意金箍棒 · Ruyi Jingu Bang",type:"divine",country:"Китай",wielder:["Джин Мори","Сунь Укун, Великий Мудрец, равный Небу"],holders:[["Король Драконов Восточного моря","хранил посох на дне моря"]],
+  about:"Железный столп, которым по легенде мерили глубину морей. Сунь Укун забрал его из дворца Короля Драконов. Посох весит 13 500 цзиней и меняет размер по воле хозяина: от иглы за ухом до столпа до неба.",
+  manhwa:"Оружие Джина Мори. Прочнее Лука Геракла и одно из самых крепких оружий во всей манхве.",
+  can:"Посох растёт и сжимается по слову хозяина: вытягивается на десятки метров, вырастает до горы или прячется за ухом как игла. Его вес настоящий: удар обрушивает на противника всю массу посоха.\n\nПосох ломает национальные сокровища, которые ломают всё остальное. Это оружие Мудреца, и в руках того, кто связан с Сунь Укуном, ему нет равных.",
+  passive:[["str",4],["tech",3]],
+  ult:["Столп Неба","Посох вырастает до размеров горы и обрушивается на поле боя. Удар раскалывает землю на сотни метров."],
+  limits:"Только по сюжету и с решения ГМа. Это оружие Мудреца.",plot:true}
+];
+
+/* ======= ПРАВИЛА ======= */
+const RULES=[
+ {k:"key",t:"Как получить",html:`<p>Со старта сокровище не выдаётся. Путей два:</p>
+  <ul><li><b>Трейт.</b> Некоторые трейты дают персонажу сокровище при создании.</li>
+  <li><b>Сюжет.</b> ГМ отыгрывает событие, в котором боец получает сокровище: экзамен на сертификацию, вручение от страны за победу или заслуги, наследство рода, находка в руинах или хранилище, трофей с поверженного носителя.</li></ul>`},
+ {t:"Экзамен на сертификацию",html:`<p>Сокровище само выбирает хозяина. Экзамен — это момент, когда предмет откликается на того, кого признал: приходит в руку, загорается, отзывается на зов.</p><p>Не каждый кандидат его проходит. Сокровище может отказать, и тогда силой его не взять.</p>`},
+ {t:"Общие свойства",html:`<ul><li>Является к хозяину по зову с любого расстояния.</li><li>Парит и само летит в руку.</li><li>Усиливает удары, режет мощный чарёк, держит очень сильные атаки.</li><li>Раздувает чарёк носителя три раза подряд, потом ему нужен перерыв.</li></ul>`},
+ {t:"Цена использования",html:`<p>У каждого сокровища своя цена:</p><ul><li>расход GP на сильные приёмы;</li><li>лимит: раз за бой, раз за арку, раз за игру;</li><li>откат по Выносливости или Скорости;</li><li>характер предмета: клятва, жажда крови, запреты на поведение.</li></ul>`},
+ {t:"Синергия",html:`<ul><li><b>Мифология совпадает с чарёком</b> (Ороти и Кусанаги, Геракл и его лук): сокровище раскрывается сильнее.</li><li><b>Прямой потомок</b> бога или героя может призвать его настоящее оружие.</li><li><b>Сокровище совпадает со стилем</b> (рапира у Lance de Combat, сарисса у Македонской сариссы): появляется связка «стиль + сокровище».</li></ul>`},
+ {t:"Потеря и охота",html:`<p>Сокровище можно отнять, украсть, потерять или сломать, но только по сюжету. Кража чужого сокровища влечёт розыск страны-владельца и охоту NOX.</p><p>Каждый носитель на виду: о нём знают его страна, Судьи турнира и, скорее всего, враги.</p>`}
+];
+
+/* ======= АНКЕТА ======= */
+const FORM=[
+ ["Название","как сокровище называют на сервере"],["Оригинальное название","на языке страны"],["Тип","холодное, стрелковое, щит или доспех, реликвия"],["Страна","выбирается из списка всех стран мира, становится тегом на плитке"],["Происхождение","миф, история или как сокровище обрело славу"],["Прошлые владельцы",""],["Как получено","трейт или сюжетное событие"],["Внешний вид","+ арт"],["О сокровище","история и что о нём известно"],["Что умеет","подробное описание силы сокровища"],["Пассивные бонусы","действуют, пока сокровище при носителе"],["Ультимативная техника","и как часто её можно применять"],["Ограничения и цена",""],["Синергия","с какими чарёками и стилями"]
+];
+
+/* ======= утилиты ======= */
+const app=document.getElementById("app");
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const hash=s=>{let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)};
+function art(seed,color,word){
+  const cx=[300,420,200,350][seed%4],cy=[220,160,260,200][(seed>>2)%4];let l="";
+  for(let i=0;i<64;i++){const a=i/64*Math.PI*2+(seed%9)*.03,r1=50+((i*29+seed)%70);l+=`<line x1="${(cx+Math.cos(a)*r1).toFixed(1)}" y1="${(cy+Math.sin(a)*r1).toFixed(1)}" x2="${(cx+Math.cos(a)*900).toFixed(1)}" y2="${(cy+Math.sin(a)*900).toFixed(1)}" stroke="${i%6===0?color:"#fff"}" stroke-width="${i%6===0?4:1}" stroke-opacity="${i%6===0?.75:.16}"/>`}
+  return `<svg viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><radialGradient id="g${seed}" cx="${cx/6}%" cy="${cy/8}%" r="60%"><stop offset="0" stop-color="${color}" stop-opacity=".55"/><stop offset="1" stop-color="#07080D" stop-opacity="0"/></radialGradient></defs><rect width="600" height="800" fill="#0E1119"/>${l}<rect width="600" height="800" fill="url(#g${seed})"/>${word?`<text x="${cx}" y="${cy+30}" text-anchor="middle" font-family="Rubik Mono One,Arial Black" font-size="92" fill="#fff" fill-opacity=".9" stroke="#07080D" stroke-width="8" paint-order="stroke" transform="rotate(-8 ${cx} ${cy})">${word}</text>`:""}</svg>`}
+const tc=t=>TT[t.type][1];
+const picOf=t=>t.img||imgOf(t.id);
+const media=t=>picOf(t)?`<img class="fg" src="${esc(picOf(t))}" alt="" loading="lazy">`:art(hash(t.id),tc(t),"");
+const modChip=([k,v],cls)=>`<span class="mod ${cls}">${esc(ST[k]||k)} ${v>0?"+":""}${v}</span>`;
+const paras=s=>String(s||"").split(/\n\n+/).map(p=>`<p>${esc(p)}</p>`).join("");
+const tags=t=>t.plot?'<span class="flag">только сюжет</span>':"";
+let tf="all",cf="all",sf="all",q="",HERO="";
+/* сокровища игроков: одобренные анкеты с основного сайта (на сайте заполняется из базы) */
+let PLAYERS=[];
+const ALL=()=>TREASURES.concat(PLAYERS);
+
+/* ======= главная ======= */
+function renderHome(scrollTo){
+  const countries=[...new Set(ALL().map(t=>t.country))].sort((a,b)=>a==="Неизвестно"?1:b==="Неизвестно"?-1:a.localeCompare(b,"ru"));
+  const list=ALL().filter(t=>(tf==="all"||t.type===tf)&&(cf==="all"||t.country===cf)&&(sf==="all"||(sf==="player")===!!t.player)&&(!q||[t.name,t.orig,t.country,t.wielder[0],...t.holders.map(o=>o[0])].join(" ").toLowerCase().includes(q)))
+    .sort((a,b)=>(b.player?1:0)-(a.player?1:0)||TORDER.indexOf(a.type)-TORDER.indexOf(b.type));
+  const nC=new Set(ALL().map(t=>t.country).filter(c=>c!=="Неизвестно")).size;
+  app.innerHTML=`<section class="hero"><div class="txt"><span class="eyebrow">Вики сервера «Царь Горы»</span><h1>НАЦИОНАЛЬНЫЕ<em>СОКРОВИЩА</em></h1>
+    <p>Предметы из истории человечества, которые обрели такую славу, что в них появилась сила. У каждого своя воля, и каждое само выбирает хозяина.</p>
+    <div class="counter"><div><b>${TREASURES.length}</b><span>из манхвы</span></div><div><b>${PLAYERS.length}</b><span>у игроков</span></div><div><b>${nC}</b><span>стран</span></div></div></div>
+    <div class="art" data-slot="hero">${imgOf("hero")?`<img src="${esc(imgOf("hero"))}" alt="">`:art(11,"#FFD23F","RELIC")}</div></section>
+
+   <section class="sec"><details class="lore" open><summary>Что такое национальные сокровища</summary><div class="lb">${LORE.map(([c,t])=>c==="h"?`<h3>${esc(t)}</h3>`:`<p class="${c}">${esc(t)}</p>`).join("")}</div></details></section>
+
+   <section class="sec" id="rules"><h2 class="sech">Правила</h2>
+    <div class="rules">${RULES.map(r=>`<div class="rule${r.k?" "+r.k:""}"><h3>${esc(r.t)}</h3>${r.html}</div>`).join("")}</div></section>
+
+   <section class="sec" id="list"><h2 class="sech">Сокровища</h2>
+    <div class="cats">${TORDER.map(k=>`<button type="button" class="cat" data-t="${k}" aria-pressed="${tf===k}" style="--rc:${TT[k][1]}"><b>${TT[k][0]} · ${ALL().filter(x=>x.type===k).length}</b><span>${esc(TT[k][2])}</span></button>`).join("")}</div>
+    <div class="bar"><div class="chips"><button type="button" class="chip" data-t="all" aria-pressed="${tf==="all"}">Все типы</button>${TORDER.map(k=>`<button type="button" class="chip" data-t="${k}" aria-pressed="${tf===k}">${TT[k][0]}</button>`).join("")}</div>
+     <div class="chips">${[["all","Все"],["canon","Из манхвы"],["player","Игроков"]].map(([k,n])=>`<button type="button" class="chip" data-sf="${k}" aria-pressed="${sf===k}">${n}</button>`).join("")}<select class="search sel" id="cf" aria-label="Страна"><option value="all">Все страны</option>${countries.map(c=>`<option${c===cf?" selected":""}>${esc(c)}</option>`).join("")}</select>
+     <input class="search" id="q" placeholder="Поиск: сокровище, владелец…" value="${esc(q)}" aria-label="Поиск по сокровищам"></div></div>
+    ${list.length?`<div class="grid">${list.map(t=>`<div class="tw"${t.player?"":` data-slot="${esc(t.id)}"`}><button class="tile${t.type==="divine"?" myth":""}" style="--rc:${tc(t)}" type="button" data-id="${t.id}" aria-label="${esc(t.name)}"><span class="frame"></span><span class="inner">${media(t)}<span class="shade"></span></span>
+      <span class="rar">${esc(t.country)}</span>${t.player?'<span class="who">ИГРОК</span>':""}
+      <span class="nm"><b>${esc(t.name)}</b><span>${esc(t.wielder[0])} · ${esc(TT[t.type][0])}</span>${t.plot?`<span>${tags(t)}</span>`:""}</span></button></div>`).join("")}</div>`
+    :`<div class="empty">Ничего не нашлось.</div>`}</section>
+
+   <section class="sec"><h2 class="sech">Анкета сокровища</h2>
+    <div class="form"><p style="margin:0;color:var(--soft)">Сокровище игрока оформляется отдельной анкетой в разделе анкет на сайте, рядом с анкетами персонажа и чарёка. Анкетологи проверяют её, и после одобрения сокровище само появляется в этой вики со своей карточкой и тегом страны.</p>
+     <ol>${FORM.map(([n,h])=>`<li><b>${esc(n)}</b>${h?` — ${esc(h)}`:""}</li>`).join("")}</ol></div></section>`;
+  app.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{const c=b.classList.contains("cat");tf=c&&tf===b.dataset.t?"all":b.dataset.t;renderHome()});
+  const hf=document.getElementById("herofile");if(hf)hf.onchange=()=>{const f=hf.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{HERO=r.result;renderHome()};r.readAsDataURL(f)};
+  app.querySelectorAll("[data-sf]").forEach(b=>b.onclick=()=>{sf=b.dataset.sf;renderHome()});
+  document.getElementById("cf").onchange=e=>{cf=e.target.value;renderHome()};
+  const qi=document.getElementById("q");qi.oninput=()=>{q=qi.value.trim().toLowerCase();const p=qi.selectionStart;renderHome();const n=document.getElementById("q");n.focus();n.setSelectionRange(p,p)};
+  app.querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>go(b.dataset.id));
+  if(scrollTo){const el=document.getElementById(scrollTo);if(el)el.scrollIntoView()}
+}
+
+/* ======= страница сокровища ======= */
+function renderOne(id){
+  const t=ALL().find(x=>x.id===id);if(!t){renderHome();return}
+  if(t.player){renderPlayer(t);return}
+  const [tn,col]=TT[t.type];
+  app.innerHTML=`<button class="back" type="button" id="back">← Все сокровища</button>
+  <div class="sp"><div class="side"><div class="poster${t.type==="divine"?" myth":""}${picOf(t)?" hasimg":""}" style="--rc:${col}" data-slot="${esc(t.id)}"><span class="frame"></span><span class="inner">${media(t)}</span><span class="vname">${esc(t.name)}</span></div>
+    <div class="card"><h2>Паспорт</h2><dl class="pass"><dt>Тип</dt><dd style="color:${col}">${tn}</dd><dt>Страна</dt><dd>${esc(t.country)}</dd><dt>Носитель в манхве</dt><dd>${esc(t.wielder[0])}<br><span class="muted" style="font-weight:400">${esc(t.wielder[1])}</span></dd><dt>Получение</dt><dd>${t.plot?"Только по сюжету":"Трейт или сюжет"}</dd></dl></div>
+    ${t.holders.length?`<div class="card"><h2>Прошлые владельцы</h2><div class="people">${t.holders.map(([n,r])=>`<div class="person"><b>${esc(n)}</b>${esc(r)}</div>`).join("")}</div></div>`:""}</div>
+  <div class="stack"><div class="head"><span class="eyebrow" style="color:${col}">${tn}</span><h1>${esc(t.name)}</h1><span class="orig">${esc(t.orig)}</span>
+    <div class="badges"><span class="badge" style="color:${col}">${tn}</span><span class="badge" style="color:var(--gold)">${esc(t.country)}</span>${tags(t)}</div></div>
+   <div class="card"><h2>О сокровище</h2><p>${esc(t.about)}</p></div>
+   ${t.look?`<div class="card look"><h2>Как выглядит</h2><p>${esc(t.look)}</p></div>`:""}
+   <div class="card manhwa"><h2>В манхве</h2><p>${esc(t.manhwa)}</p></div>
+   <div class="card can"><h2>Что умеет</h2><div class="txtb">${paras(t.can)}</div></div>
+   <div class="card"><h2>Пассивные бонусы</h2><p class="note" style="margin-bottom:10px">Действуют, пока сокровище при носителе.</p><div class="mods">${t.passive.map(m=>modChip(m,"p")).join("")}</div></div>
+   <div class="card ult"><h2>Ультимативная техника</h2><b class="an">${esc(t.ult[0])}</b><p>${esc(t.ult[1])}</p></div>
+   <div class="card limits"><h2>Ограничения</h2><p>${esc(t.limits)}</p></div>
+  </div></div>`;
+  document.getElementById("back").onclick=()=>go("");
+}
+
+function renderPlayer(t){
+  const [tn,col]=TT[t.type];
+  const sec=(h,v,cls)=>v?`<div class="card${cls?" "+cls:""}"><h2>${h}</h2><div class="txtb">${paras(v)}</div></div>`:"";
+  app.innerHTML=`<button class="back" type="button" id="back">← Все сокровища</button>
+  <div class="sp"><div class="side"><div class="poster${picOf(t)?" hasimg":""}" style="--rc:${col}"><span class="frame"></span><span class="inner">${media(t)}</span><span class="vname">${esc(t.name)}</span></div>
+    <div class="card"><h2>Паспорт</h2><dl class="pass"><dt>Тип</dt><dd style="color:${col}">${tn}</dd><dt>Страна</dt><dd>${esc(t.country)}</dd><dt>Носитель</dt><dd><a href="${esc(t.link||"#")}" style="color:var(--gold)">${esc(t.wielder[0])}</a><br><span class="muted" style="font-weight:400">${esc(t.wielder[1])}</span></dd>${t.how?`<dt>Как получено</dt><dd>${esc(t.how)}</dd>`:""}</dl></div></div>
+  <div class="stack"><div class="head"><span class="eyebrow" style="color:${col}">Сокровище игрока · ${tn}</span><h1>${esc(t.name)}</h1>${t.orig?`<span class="orig">${esc(t.orig)}</span>`:""}
+    <div class="badges"><span class="badge" style="color:${col}">${tn}</span><span class="badge" style="color:var(--gold)">${esc(t.country)}</span><span class="badge" style="color:var(--cy)">Анкета одобрена</span></div></div>
+   ${sec("О сокровище",t.about)}${sec("Происхождение",t.origin)}${sec("Прошлые владельцы",t.owners)}${sec("Внешний вид",t.look)}${sec("Что умеет",t.can,"can")}${sec("Пассивные бонусы",t.passiveText)}
+   ${t.ult?`<div class="card ult"><h2>Ультимативная техника</h2><div class="txtb">${paras(t.ult)}</div></div>`:""}
+   ${sec("Ограничения и цена",t.limits,"limits")}${sec("Синергия",t.synergy)}
+  </div></div>`;
+  document.getElementById("back").onclick=()=>go("");
+}
+
+
+/* ======= база сайта: картинки (ГМ) и одобренные сокровища игроков ======= */
+let IMG={},ADMIN=false,DB=null,AS=null,IMGJSON="{}",FIG={},REV={};
+const imgOf=k=>IMG[k]?(window.BLOB_BASE||"")+IMG[k]:"";
+const norm=x=>String(x||"").toLowerCase().replace(/ё/g,"е").replace(/\.[a-z0-9]+$/i,"").replace(/[^a-zа-я0-9]+/g,"");
+const TYPEMAP={"Холодное оружие":"melee","Стрелковое":"ranged","Щиты и доспехи":"guard","Реликвии":"relic"};
+function toast(m,keep){const t=document.getElementById("gtoast");t.textContent=m;t.hidden=false;clearTimeout(t._t);if(!keep)t._t=setTimeout(()=>t.hidden=true,5000)}
+function rerender(){const y=window.scrollY;const a=document.activeElement&&document.activeElement.id;route(CUR);window.scrollTo(0,y);if(a==="q"){const n=document.getElementById("q");if(n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}}}
+function buildPlayers(){
+  const out=[];
+  for(const uid in FIG){const f=FIG[uid]||{},tr=f.tr,r=REV[uid]||{};
+    if(!tr||typeof tr!=="object"||tr.none||r.trStatus!=="approved"||!tr.name)continue;
+    const g=(Array.isArray(f.trGallery)?f.trGallery:[]).find(x=>x&&x.id&&x.kind!=="video");
+    out.push({id:"p-"+uid,player:true,name:String(tr.name),orig:tr.orig||"",type:TYPEMAP[tr.type]||"relic",country:tr.country||"Неизвестно",
+      wielder:[f.name||"Боец",(f.discord?"игрок "+f.discord:"игрок сервера")],link:"./#f-"+uid,holders:[],how:tr.how||"",
+      about:tr.about||"",origin:tr.origin||"",owners:tr.owners||"",look:tr.look||"",can:tr.can||"",passiveText:tr.passive||"",ult:tr.ultimate||"",limits:tr.limits||"",synergy:tr.synergy||"",
+      img:g?(window.BLOB_BASE||"")+g.id:""})}
+  out.sort((a,b)=>a.name.localeCompare(b.name,"ru"));
+  const j=JSON.stringify(out);if(j!==buildPlayers.last){buildPlayers.last=j;PLAYERS=out;rerender()}
+}
+async function initDB(){
+  try{
+    if(!window.claude)return;
+    DB=await claude.use("db");if(!DB)return;
+    DB.doc("config/treasures").onSnapshot(sn=>{const d=(sn.exists&&sn.data().img)||{};const j=JSON.stringify(d);if(j!==IMGJSON){IMG=d;IMGJSON=j;rerender()}},()=>{});
+    DB.collection("fighters").onSnapshot(sn=>{const m={};sn.docs.forEach(d=>m[d.id]=d.data());FIG=m;buildPlayers()},()=>{});
+    DB.collection("reviews").onSnapshot(sn=>{const m={};sn.docs.forEach(d=>m[d.id]=d.data());REV=m;buildPlayers()},()=>{});
+    const u=await claude.use("user");ADMIN=u?!!(await u.isOwner()):false;
+    if(ADMIN){AS=await claude.use("assets");rerender()}
+  }catch(e){}
+}
+async function shrinkImg(f){
+  if(/gif|svg/.test(f.type)||f.size<350000)return f;
+  try{const bmp=await createImageBitmap(f);const k=Math.min(1,1600/Math.max(bmp.width,bmp.height));
+    const c=document.createElement("canvas");c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);
+    c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);
+    const b=await new Promise(r=>c.toBlob(r,"image/webp",.86));return b&&b.size<f.size?b:f}catch(e){return f}
+}
+async function putImgs(pairs){
+  if(!AS){toast("Войди на главном сайте под аккаунтом ГМа.");return}
+  let ok=0,fail=[];const next=Object.assign({},IMG),old=[];
+  for(const [k,f] of pairs){toast(`Загружаю ${ok+fail.length+1} из ${pairs.length}…`,true);
+    try{const b=await shrinkImg(f);const r=await AS.upload(b,{type:b.type||f.type});if(next[k])old.push(next[k]);next[k]=r.id;ok++}
+    catch(e){fail.push(f.name+(e&&e.code==="too_large"?" (больше 20 МБ)":e&&e.code==="unsupported_type"?" (формат не подходит)":""))}}
+  if(ok){try{await DB.doc("config/treasures").set({img:next});IMG=next;IMGJSON=JSON.stringify(next);rerender()}
+    catch(e){toast("Картинки загрузились, но не сохранились в базе. Обнови страницу и попробуй ещё раз.");return}
+    old.forEach(id=>AS.delete(id).catch(()=>{}))}
+  toast(`Готово: ${ok} загружено.`+(fail.length?`\nНе вышло: ${fail.join(", ")}`:""));
+}
+async function delImg(k){
+  if(!IMG[k])return;const next=Object.assign({},IMG);const id=next[k];delete next[k];
+  try{await DB.doc("config/treasures").set({img:next});IMG=next;IMGJSON=JSON.stringify(next);rerender();AS&&AS.delete(id).catch(()=>{});toast("Картинка убрана.")}
+  catch(e){toast("Не удалось удалить. Попробуй ещё раз.")}
+}
+function pickOne(cb){const i=document.getElementById("gfile");i.value="";i.onchange=()=>{if(i.files[0])cb(i.files[0])};i.click()}
+function pickMany(cb){const i=document.getElementById("gfiles");i.value="";i.onchange=()=>{if(i.files.length)cb([...i.files])};i.click()}
+function gmTools(){
+  if(!ADMIN)return;
+  if(!CUR){const bar=document.createElement("div");bar.className="gmbar";
+    bar.innerHTML=`<b>Режим ГМа · картинки сокровищ</b><span class="muted">✎ на плитке — загрузить картинку этому сокровищу, ✎ в шапке — картинка шапки страницы. «Пачкой» — выдели много файлов, названных как сокровища (например «Мьёльнир.png» или «mjolnir.png»). Картинки сокровищ игроков берутся из их галереи на сайте.</span><button class="gbtn" type="button" id="gbulk">Картинки пачкой</button>`;
+    const g=app.querySelector("#list .bar");g&&g.before(bar);
+    document.getElementById("gbulk").onclick=()=>pickMany(files=>{const pairs=[],miss=[];
+      for(const f of files){const n=norm(f.name);const t=TREASURES.find(x=>[x.name,x.id,x.orig.split("·").pop()].map(norm).includes(n))||TREASURES.find(x=>n.length>3&&norm(x.name).startsWith(n));t?pairs.push([t.id,f]):miss.push(f.name)}
+      if(!pairs.length){toast("Ни один файл не совпал с названием сокровища.");return}
+      putImgs(pairs).then(()=>{if(miss.length)toast(`Не нашёл сокровище для: ${miss.join(", ")}`)})})}
+  app.querySelectorAll("[data-slot]").forEach(el=>{const k=el.dataset.slot;const w=document.createElement("span");w.className="slotbtns";
+    w.innerHTML=`<button type="button" title="Заменить картинку" aria-label="Заменить картинку">✎</button>${IMG[k]?`<button type="button" class="del" title="Убрать картинку" aria-label="Убрать картинку">✕</button>`:""}`;
+    w.children[0].onclick=e=>{e.stopPropagation();pickOne(f=>putImgs([[k,f]]))};
+    if(w.children[1])w.children[1].onclick=e=>{e.stopPropagation();if(w.children[1].dataset.armed!=="1"){w.children[1].dataset.armed="1";w.children[1].textContent="?";setTimeout(()=>{w.children[1].dataset.armed="";w.children[1].textContent="✕"},3000);return}delImg(k)};
+    el.appendChild(w)});
+}
+
+function go(id,sc){try{history.replaceState(null,"",id?"#"+id:"#")}catch(e){}route(id,sc);if(!sc)window.scrollTo(0,0)}
+let CUR="";
+function route(id,sc){CUR=id||"";id?renderOne(id):renderHome(sc);gmTools()}
+document.getElementById("home").onclick=()=>go("");
+document.getElementById("toall").onclick=e=>{e.preventDefault();go("");const l=document.getElementById("list");l&&l.scrollIntoView()};
+document.getElementById("torules").onclick=e=>{e.preventDefault();go("","rules")};
+route((location.hash||"").slice(1));
+initDB();
+</script>
+
+</body>
+</html>
